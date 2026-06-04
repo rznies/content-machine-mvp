@@ -47,3 +47,5 @@ db/interview-extraction.json
 
 # Scratch debug files
 test-key.js
+
+.vercel

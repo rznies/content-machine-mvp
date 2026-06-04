@@ -4,12 +4,29 @@ import dotenv from "dotenv";
 // Load environment variables in case this is imported in standalone tests
 dotenv.config();
 
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  console.warn("WARNING: GEMINI_API_KEY is not defined in the environment. Please add it to your .env file.");
+let currentKey = null;
+let currentClient = null;
+
+function getClient() {
+  const key = process.env.GEMINI_API_KEY || "";
+  if (!currentClient || key !== currentKey) {
+    currentKey = key;
+    currentClient = new GoogleGenAI({ apiKey: key });
+  }
+  return currentClient;
 }
 
-export const ai = new GoogleGenAI({ apiKey });
+export const ai = new Proxy({}, {
+  get(target, prop, receiver) {
+    const client = getClient();
+    const value = Reflect.get(client, prop, receiver);
+    if (typeof value === "function") {
+      return value.bind(client);
+    }
+    return value;
+  }
+});
+
 
 export const FAST_MODEL = "gemini-2.5-flash";
 export const PRO_MODEL = "gemini-2.5-pro";

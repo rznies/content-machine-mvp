@@ -125,24 +125,24 @@ export const ProductionTab: React.FC<{ activeIdea: Idea | null; onLog: (type: 'i
   };
 
   return (
-    <div className="space-y-6 select-none animate-in fade-in duration-300">
+    <div className="space-y-6 select-none animate-in fade-in duration-300 font-sans">
       
       {/* 1. COMPILE SCREEN */}
       {!compiled && (
-        <div className="glass-panel p-8 rounded-2xl border border-zinc-850 bg-zinc-950/20 text-center space-y-6 max-w-sm mx-auto my-6 animate-in fade-in duration-300">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
+        <div className="p-8 rounded-lg border border-hairline bg-surface-card text-center space-y-6 max-w-sm mx-auto my-6 animate-in fade-in duration-300">
+          <div className="w-16 h-16 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
             <FileArrowDown size={28} />
           </div>
           <div className="space-y-2">
-            <h3 className="text-lg font-bold text-foreground">Gather Material</h3>
-            <p className="text-xs text-zinc-500 leading-relaxed">
+            <h3 className="text-lg font-bold text-ink font-serif tracking-tight">Gather Material</h3>
+            <p className="text-xs text-muted leading-relaxed">
               Compile your interview transcript into structured cards, cataloging quotes, metrics, and emotional anchors.
             </p>
           </div>
           <button
             onClick={handleCompile}
             disabled={loading}
-            className="w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] cursor-pointer"
+            className="w-full py-3 px-6 rounded-md bg-primary hover:bg-primary-active text-on-primary font-semibold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] cursor-pointer"
           >
             {loading ? <ArrowsClockwise className="w-4 h-4 animate-spin" /> : <FileArrowDown size={14} />}
             <span>Compile Raw File</span>
@@ -158,7 +158,7 @@ export const ProductionTab: React.FC<{ activeIdea: Idea | null; onLog: (type: 'i
             
             {/* Quotes Column */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 border-b border-zinc-850 pb-2 px-1 text-xs font-bold text-zinc-400">
+              <div className="flex items-center gap-2 border-b border-hairline pb-2 px-1 text-xs font-bold text-muted font-sans">
                 <Quotes size={16} className="text-primary" />
                 <span>Quotes</span>
               </div>
@@ -171,29 +171,29 @@ export const ProductionTab: React.FC<{ activeIdea: Idea | null; onLog: (type: 'i
                         key={idx} 
                         onClick={() => toggleStar(`q-${idx}`)}
                         className={clsx(
-                          "p-3 rounded-xl border bg-zinc-950/40 text-left hover:border-zinc-800 transition-all duration-200 cursor-pointer relative group",
-                          isStarred ? "border-primary/45 shadow shadow-primary/5" : "border-zinc-900"
+                          "p-3 rounded-lg border bg-surface-card text-left hover:border-primary/20 transition-all duration-200 cursor-pointer relative group text-ink",
+                          isStarred ? "border-primary/45 shadow shadow-primary/5 bg-surface-cream-strong/20" : "border-hairline"
                         )}
                       >
-                        <p className="text-[10.5px] leading-relaxed text-zinc-350 select-text pr-5">
+                        <p className="text-[10.5px] leading-relaxed text-body select-text pr-5">
                           "{quote}"
                         </p>
-                        <span className="absolute top-2.5 right-2.5 text-zinc-650 group-hover:text-amber-500 transition-colors">
-                          <Star size={12} weight={isStarred ? 'fill' : 'bold'} className={isStarred ? 'text-amber-500' : ''} />
+                        <span className="absolute top-2.5 right-2.5 text-muted-soft group-hover:text-accent-amber transition-colors">
+                          <Star size={12} weight={isStarred ? 'fill' : 'bold'} className={isStarred ? 'text-accent-amber' : ''} />
                         </span>
                       </div>
                     );
                   })
                 ) : (
-                  <div className="text-center py-8 text-[10px] text-zinc-600 italic">No quotes extracted.</div>
+                  <div className="text-center py-8 text-[10px] text-muted italic">No quotes extracted.</div>
                 )}
               </div>
             </div>
 
             {/* Numbers Column */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 border-b border-zinc-850 pb-2 px-1 text-xs font-bold text-zinc-400">
-                <ListNumbers size={16} className="text-emerald-500" />
+              <div className="flex items-center gap-2 border-b border-hairline pb-2 px-1 text-xs font-bold text-muted font-sans">
+                <ListNumbers size={16} className="text-accent-teal" />
                 <span>Numbers & Metrics</span>
               </div>
               <div className="space-y-3 max-h-[360px] overflow-y-auto custom-scroll pr-1">
@@ -205,31 +205,31 @@ export const ProductionTab: React.FC<{ activeIdea: Idea | null; onLog: (type: 'i
                         key={idx} 
                         onClick={() => toggleStar(`n-${idx}`)}
                         className={clsx(
-                          "p-3 rounded-xl border bg-zinc-950/40 text-left hover:border-zinc-800 transition-all duration-200 cursor-pointer relative group",
-                          isStarred ? "border-primary/45 shadow shadow-primary/5" : "border-zinc-900"
+                          "p-3 rounded-lg border bg-surface-card text-left hover:border-primary/20 transition-all duration-200 cursor-pointer relative group text-ink",
+                          isStarred ? "border-primary/45 shadow shadow-primary/5 bg-surface-cream-strong/20" : "border-hairline"
                         )}
                       >
-                        <p className="text-xs font-bold text-foreground">
+                        <p className="text-xs font-bold text-ink font-serif">
                           {num.value}
                         </p>
-                        <p className="text-[10px] leading-normal text-zinc-500 mt-1 select-text pr-5">
+                        <p className="text-[10px] leading-normal text-muted mt-1 select-text pr-5">
                           {num.context}
                         </p>
-                        <span className="absolute top-2.5 right-2.5 text-zinc-650 group-hover:text-amber-500 transition-colors">
-                          <Star size={12} weight={isStarred ? 'fill' : 'bold'} className={isStarred ? 'text-amber-500' : ''} />
+                        <span className="absolute top-2.5 right-2.5 text-muted-soft group-hover:text-accent-amber transition-colors">
+                          <Star size={12} weight={isStarred ? 'fill' : 'bold'} className={isStarred ? 'text-accent-amber' : ''} />
                         </span>
                       </div>
                     );
                   })
                 ) : (
-                  <div className="text-center py-8 text-[10px] text-zinc-600 italic">No metrics extracted.</div>
+                  <div className="text-center py-8 text-[10px] text-muted italic">No metrics extracted.</div>
                 )}
               </div>
             </div>
 
             {/* Emotional Moments Column */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 border-b border-zinc-850 pb-2 px-1 text-xs font-bold text-zinc-400">
+              <div className="flex items-center gap-2 border-b border-hairline pb-2 px-1 text-xs font-bold text-muted font-sans">
                 <Heart size={16} className="text-rose-500" />
                 <span>Emotional Moments</span>
               </div>
@@ -242,41 +242,41 @@ export const ProductionTab: React.FC<{ activeIdea: Idea | null; onLog: (type: 'i
                         key={idx} 
                         onClick={() => toggleStar(`e-${idx}`)}
                         className={clsx(
-                          "p-3 rounded-xl border bg-zinc-950/40 text-left hover:border-zinc-800 transition-all duration-200 cursor-pointer relative group",
-                          isStarred ? "border-primary/45 shadow shadow-primary/5" : "border-zinc-900"
+                          "p-3 rounded-lg border bg-surface-card text-left hover:border-primary/20 transition-all duration-200 cursor-pointer relative group text-ink",
+                          isStarred ? "border-primary/45 shadow shadow-primary/5 bg-surface-cream-strong/20" : "border-hairline"
                         )}
                       >
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-rose-450 bg-rose-500/10 border border-rose-550/10 px-1.5 py-0.5 rounded-md">
+                          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-md">
                             {em.emotion}
                           </span>
                         </div>
-                        <p className="text-[10px] leading-normal text-zinc-500 mt-2 select-text font-sans">
+                        <p className="text-[10px] leading-normal text-body mt-2 select-text font-sans">
                           {em.moment}
                         </p>
-                        <p className="text-[10px] leading-normal text-zinc-450 mt-1 select-text italic pr-5">
+                        <p className="text-[10px] leading-normal text-muted mt-1 select-text italic pr-5">
                           "{em.quote}"
                         </p>
-                        <span className="absolute top-2.5 right-2.5 text-zinc-650 group-hover:text-amber-500 transition-colors">
+                        <span className="absolute top-2.5 right-2.5 text-muted-soft group-hover:text-accent-amber transition-colors">
                           <Star size={12} weight={isStarred ? 'fill' : 'bold'} className={isStarred ? 'text-amber-500' : ''} />
                         </span>
                       </div>
                     );
                   })
                 ) : (
-                  <div className="text-center py-8 text-[10px] text-zinc-600 italic">No emotional spikes extracted.</div>
+                  <div className="text-center py-8 text-[10px] text-muted italic">No emotional spikes extracted.</div>
                 )}
               </div>
             </div>
           </div>
 
           {/* Things We Couldn't Find (Manual details) */}
-          <div className="glass-panel p-5 rounded-2xl border border-zinc-850 bg-zinc-950/20 space-y-4">
-            <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
-              <Warning size={14} className="text-amber-500" />
+          <div className="p-5 rounded-lg border border-hairline bg-surface-card space-y-4 text-ink">
+            <h4 className="text-xs font-bold text-ink flex items-center gap-1.5 font-serif tracking-tight">
+              <Warning size={14} className="text-accent-amber" />
               <span>3 things we couldn't find</span>
             </h4>
-            <p className="text-[10.5px] text-zinc-500 leading-normal max-w-xl">
+            <p className="text-[10.5px] text-muted leading-normal max-w-xl">
               Add any missing figures, stories, or contexts manually. We will feed these directly into the Anchor Draft revision keys to fill in the gaps.
             </p>
 
@@ -286,30 +286,30 @@ export const ProductionTab: React.FC<{ activeIdea: Idea | null; onLog: (type: 'i
                 value={gap1}
                 onChange={(e) => setGap1(e.target.value)}
                 placeholder="Missing figure #1 (e.g. 24% signup growth)..."
-                className="w-full bg-zinc-950/60 border border-zinc-850 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl p-2.5 text-[10.5px] text-foreground placeholder-zinc-700 transition-colors outline-none"
+                className="w-full bg-canvas border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md p-2.5 text-[10.5px] text-ink placeholder-muted/50 transition-colors outline-none"
               />
               <input
                 type="text"
                 value={gap2}
                 onChange={(e) => setGap2(e.target.value)}
                 placeholder="Missing context #2 (e.g. Alice disagreed)..."
-                className="w-full bg-zinc-950/60 border border-zinc-850 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl p-2.5 text-[10.5px] text-foreground placeholder-zinc-700 transition-colors outline-none"
+                className="w-full bg-canvas border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md p-2.5 text-[10.5px] text-ink placeholder-muted/50 transition-colors outline-none"
               />
               <input
                 type="text"
                 value={gap3}
                 onChange={(e) => setGap3(e.target.value)}
                 placeholder="Missing story #3 (e.g. client meeting call)..."
-                className="w-full bg-zinc-950/60 border border-zinc-850 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl p-2.5 text-[10.5px] text-foreground placeholder-zinc-700 transition-colors outline-none"
+                className="w-full bg-canvas border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md p-2.5 text-[10.5px] text-ink placeholder-muted/50 transition-colors outline-none"
               />
             </div>
           </div>
 
           {/* Action CTAs Footer */}
-          <div className="flex items-center justify-between border-t border-zinc-850 pt-5">
+          <div className="flex items-center justify-between border-t border-hairline pt-5">
             <button
               onClick={handleCompile}
-              className="py-2.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 text-zinc-500 hover:text-zinc-350 text-[10px] font-bold transition-colors cursor-pointer"
+              className="py-2.5 px-4 rounded-md bg-canvas hover:bg-surface-soft border border-hairline text-muted hover:text-ink text-[10px] font-bold transition-colors cursor-pointer"
             >
               Recompile Material
             </button>
@@ -317,7 +317,7 @@ export const ProductionTab: React.FC<{ activeIdea: Idea | null; onLog: (type: 'i
             <button
               onClick={handleSaveGapsAndDraft}
               disabled={savingGaps}
-              className="py-2.5 px-6 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] group cursor-pointer"
+              className="py-2.5 px-6 rounded-md bg-primary hover:bg-primary-active text-on-primary font-semibold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] group cursor-pointer"
             >
               <span>Looks good — let's draft</span>
               <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />

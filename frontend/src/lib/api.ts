@@ -56,6 +56,10 @@ export interface SettingsStatus {
   hasSlackToken: boolean;
   researchMode: string;
   message: string;
+  geminiApiKey?: string;
+  tavilyApiKey?: string;
+  firecrawlApiKey?: string;
+  slackBotToken?: string;
 }
 
 // Fetch helper that handles proxy endpoints
@@ -188,6 +192,12 @@ export const api = {
     request<{ success: boolean }>('/api/settings/save-file', {
       method: 'POST',
       body: JSON.stringify({ name, content }),
+    }),
+
+  saveKeys: (keys: { geminiApiKey?: string; tavilyApiKey?: string; firecrawlApiKey?: string; slackBotToken?: string }) =>
+    request<{ success: boolean }>('/api/settings/save-keys', {
+      method: 'POST',
+      body: JSON.stringify(keys),
     }),
 
   getSettingsStatus: () =>

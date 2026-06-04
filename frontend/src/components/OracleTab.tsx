@@ -105,11 +105,11 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
 
   const getStrengthConfig = (score: number) => {
     if (score >= 7.5) {
-      return { label: 'Strong fit', className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+      return { label: 'Strong fit', className: 'bg-success/10 text-success border-success/20' };
     } else if (score >= 5.0) {
-      return { label: 'Possible', className: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+      return { label: 'Possible', className: 'bg-accent-amber/10 text-accent-amber border-accent-amber/20' };
     } else {
-      return { label: 'Stretch', className: 'bg-zinc-800 text-zinc-400 border-zinc-700' };
+      return { label: 'Stretch', className: 'bg-surface-soft text-muted border-hairline' };
     }
   };
 
@@ -132,16 +132,13 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
             return (
               <div 
                 key={source.id} 
-                className={clsx(
-                  "p-4 rounded-2xl border flex flex-col justify-between h-28 hover:scale-[1.01] transition-transform duration-200",
-                  source.color
-                )}
+                className="p-4 rounded-lg border border-hairline bg-surface-card text-ink flex flex-col justify-between h-28 hover:scale-[1.01] transition-transform duration-200"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider opacity-60">{source.label}</span>
-                  <Icon size={18} weight="bold" />
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted">{source.label}</span>
+                  <Icon size={18} className="text-primary" weight="bold" />
                 </div>
-                <div className="text-base font-semibold tracking-tight mt-3">
+                <div className="text-base font-semibold tracking-tight mt-3 text-ink">
                   {source.count}
                 </div>
               </div>
@@ -152,7 +149,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
 
       {/* Main Scan Control Container */}
       {!mined && (
-        <div className="glass-panel p-8 rounded-2xl border border-zinc-800 bg-zinc-950/40 text-center flex flex-col items-center justify-center min-h-[280px] shadow-lg relative overflow-hidden">
+        <div className="p-8 rounded-lg border border-hairline bg-surface-card text-center flex flex-col items-center justify-center min-h-[280px] shadow-sm relative overflow-hidden">
           
           {loading ? (
             <div className="space-y-6 w-full max-w-xs py-4 animate-in fade-in duration-350">
@@ -161,10 +158,10 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
                 <ArrowsClockwise size={32} className="text-primary animate-spin" />
               </div>
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold tracking-tight text-foreground">{getScanProgressText()}</h4>
-                <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-850">
+                <h4 className="text-sm font-semibold tracking-tight text-ink font-serif">{getScanProgressText()}</h4>
+                <div className="h-1.5 w-full bg-surface-soft rounded-md overflow-hidden border border-hairline">
                   <div 
-                    className="h-full bg-primary transition-all duration-500 rounded-full" 
+                    className="h-full bg-primary transition-all duration-500 rounded-md" 
                     style={{ width: `${(scanStep / 6) * 100}%` }}
                   />
                 </div>
@@ -172,18 +169,18 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
             </div>
           ) : (
             <div className="space-y-6 max-w-sm mx-auto my-auto animate-in fade-in duration-300">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto shadow-inner text-primary">
+              <div className="w-16 h-16 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto shadow-inner text-primary">
                 <MagnifyingGlass size={28} />
               </div>
               <div className="space-y-2">
-                <h3 className="text-lg font-bold text-foreground">Scan all sources</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed">
+                <h3 className="text-lg font-bold text-ink font-serif tracking-tight">Scan all sources</h3>
+                <p className="text-xs text-body leading-relaxed">
                   The Oracle will compile thoughts across your chats, emails, and syncs, automatically filtering out duplicates to surface high-priority spikes.
                 </p>
               </div>
               <button
                 onClick={handleScan}
-                className="w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] cursor-pointer"
+                className="w-full py-3 px-6 rounded-md bg-primary hover:bg-primary-active text-on-primary font-semibold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
               >
                 <Lightning size={14} weight="fill" />
                 <span>Scan all sources</span>
@@ -197,17 +194,17 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
       {mined && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div className="flex items-center justify-between border-b border-hairline pb-3">
             <div>
-              <h3 className="text-sm font-bold text-foreground">Top Candidates Mined</h3>
-              <p className="text-[10px] text-zinc-500 mt-0.5">
-                We filtered out <span className="font-semibold text-zinc-400">{skippedCount}</span> duplicate concepts during deduplication.
+              <h3 className="text-sm font-bold text-ink font-serif tracking-tight">Top Candidates Mined</h3>
+              <p className="text-[10px] text-muted mt-0.5">
+                We filtered out <span className="font-semibold text-ink">{skippedCount}</span> duplicate concepts during deduplication.
               </p>
             </div>
 
             <button
               onClick={() => onNavigateToTab('vault')}
-              className="py-1.5 px-3 rounded-lg border border-zinc-850 bg-zinc-950/40 text-[10px] text-primary font-semibold hover:bg-zinc-900 transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="py-1.5 px-3 rounded-md border border-hairline bg-canvas text-[10px] text-primary hover:text-primary-active hover:bg-surface-soft font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <span>View full vault</span>
               <ArrowRight size={12} />
@@ -220,7 +217,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
               return (
                 <div 
                   key={idea.id} 
-                  className="p-5 rounded-2xl border border-zinc-850 bg-zinc-950/40 flex flex-col justify-between h-56 hover:border-zinc-800 transition-colors duration-200"
+                  className="p-5 rounded-lg border border-hairline bg-surface-card flex flex-col justify-between h-56 hover:border-primary/20 transition-colors duration-200"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -230,24 +227,24 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
                       )}>
                         {strength.label}
                       </span>
-                      <span className="flex items-center gap-1.5 text-[9px] text-zinc-500 font-mono">
+                      <span className="flex items-center gap-1.5 text-[9px] text-muted font-mono">
                         {getSourceIcon(idea.source)}
                         <span>{idea.source}</span>
                       </span>
                     </div>
 
-                    <h4 className="text-xs font-bold text-foreground line-clamp-2 leading-snug">
+                    <h4 className="text-xs font-bold text-ink line-clamp-2 leading-snug font-serif">
                       {idea.title}
                     </h4>
 
-                    <p className="text-[10.5px] text-zinc-400 line-clamp-3 leading-relaxed">
+                    <p className="text-[10.5px] text-body line-clamp-3 leading-relaxed">
                       {idea.description}
                     </p>
                   </div>
 
                   <button
                     onClick={() => handleUseIdea(idea)}
-                    className="w-full py-2 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 hover:text-foreground text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors active:scale-95 cursor-pointer mt-3"
+                    className="w-full py-2 px-4 rounded-md bg-canvas hover:bg-surface-soft border border-hairline text-ink hover:text-primary text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors active:scale-95 cursor-pointer mt-3"
                   >
                     <span>Use this idea</span>
                     <ArrowRight size={10} />

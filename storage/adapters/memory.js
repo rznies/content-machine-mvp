@@ -1,4 +1,6 @@
 import { StorageInterface } from "../interface.js";
+import fs from "fs/promises";
+import path from "path";
 
 export class InMemoryStorageAdapter extends StorageInterface {
   constructor() {
@@ -7,7 +9,41 @@ export class InMemoryStorageAdapter extends StorageInterface {
   }
 
   async ensureInitialized() {
-    // No-op for in-memory adapter
+    if (process.env.NODE_ENV === "test") {
+      return;
+    }
+    const filesToPrepopulate = [
+      { key: "vault", name: "vault.json", type: "json", defaultVal: [] },
+      { key: "active-idea", name: "active-idea.json", type: "json", defaultVal: null },
+      { key: "active-interview", name: "active-interview.json", type: "json", defaultVal: null },
+      { key: "style-guide", name: "style-guide.md", type: "text", defaultVal: "" },
+      { key: "style-system", name: "style-system.json", type: "json", defaultVal: { voice: {}, rules: [], preferredPhrases: [], platformAdaptations: {}, voiceExamples: [] } },
+      { key: "content-lessons", name: "content-lessons.json", type: "json", defaultVal: { global: [], byContentType: {}, metrics: { averageScoreHistory: [], lessonCount: 0, lastUpdated: new Date().toISOString().split("T")[0] } } },
+      { key: "derivatives", name: "derivatives.json", type: "json", defaultVal: [] },
+      { key: "anti-slop", name: "anti-slop.json", type: "json", defaultVal: { bannedWords: [], bannedPatterns: [], replacements: {} } },
+      { key: "golden-examples", name: "golden-examples.json", type: "json", defaultVal: [] },
+      { key: "mock-inputs", name: "mock-inputs.json", type: "json", defaultVal: {} },
+      { key: "interview-extraction", name: "interview-extraction.json", type: "json", defaultVal: {} },
+      { key: "active-content-type", name: "active-content-type.json", type: "json", defaultVal: { contentType: "all" } },
+      { key: "active-run-score", name: "active-run-score.json", type: "json", defaultVal: { finalScore: 8.0 } }
+    ];
+
+    for (const f of filesToPrepopulate) {
+      const filePath = path.join("db", f.name);
+      try {
+        const data = await fs.readFile(filePath, "utf-8");
+        if (f.type === "json") {
+          this.store.set(f.key, JSON.parse(data));
+          this.store.set(f.name, JSON.parse(data));
+        } else {
+          this.store.set(f.key, data);
+          this.store.set(f.name, data);
+        }
+      } catch (err) {
+        this.store.set(f.key, f.defaultVal);
+        this.store.set(f.name, f.defaultVal);
+      }
+    }
   }
 
   async getVault() {

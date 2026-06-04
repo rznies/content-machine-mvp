@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { storage } from "./storage/index.js";
 
@@ -346,16 +347,90 @@ app.get("/api/settings/status", async (req, res) => {
     hasFirecrawlKey,
     hasSlackToken,
     researchMode,
+    geminiApiKey: process.env.GEMINI_API_KEY || "",
+    tavilyApiKey: process.env.TAVILY_API_KEY || "",
+    firecrawlApiKey: process.env.FIRECRAWL_API_KEY || "",
+    slackBotToken: process.env.SLACK_BOT_TOKEN || "",
     message: hasGeminiKey 
       ? `Gemini API: Connected | Research Mode: ${researchMode}`
       : "Gemini API Key Missing. Set GEMINI_API_KEY in .env"
   });
 });
 
-// Start Express Server
-app.listen(PORT, () => {
-  console.log(`==================================================`);
-  console.log(`Content Machine Server running at http://localhost:${PORT}`);
-  console.log(`Open http://localhost:${PORT} in your browser to interact.`);
-  console.log(`==================================================`);
+app.post("/api/settings/save-keys", async (req, res) => {
+  try {
+    const { geminiApiKey, tavilyApiKey, firecrawlApiKey, slackBotToken } = req.body;
+    const envPath = path.resolve(".env");
+    let content = "";
+    try {
+      content = await fs.readFile(envPath, "utf-8");
+    } catch (err) {
+      if (err.code !== "ENOENT") throw err;
+    }
+
+    const lines = content.split(/\r?\n/);
+    const keysToUpdate = {
+      GEMINI_API_KEY: geminiApiKey,
+      TAVILY_API_KEY: tavilyApiKey,
+      FIRECRAWL_API_KEY: firecrawlApiKey,
+      SLACK_BOT_TOKEN: slackBotToken
+    };
+
+    const updatedLines = [];
+    const processedKeys = new Set();
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith("#") && trimmed.includes("=")) {
+        const parts = trimmed.split("=");
+        const key = parts[0].trim();
+        if (keysToUpdate[key] !== undefined) {
+          if (keysToUpdate[key]) {
+            updatedLines.push(`${key}="${keysToUpdate[key]}"`);
+          }
+          processedKeys.add(key);
+        } else {
+          updatedLines.push(line);
+        }
+      } else {
+        updatedLines.push(line);
+      }
+    }
+
+    for (const [key, val] of Object.entries(keysToUpdate)) {
+      if (!processedKeys.has(key) && val) {
+        updatedLines.push(`${key}="${val}"`);
+      }
+    }
+
+    await fs.writeFile(envPath, updatedLines.join("\n"), "utf-8");
+
+    // Update in-memory process environment variables immediately
+    for (const [key, val] of Object.entries(keysToUpdate)) {
+      if (val !== undefined) {
+        if (val) {
+          process.env[key] = val;
+        } else {
+          delete process.env[key];
+        }
+      }
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Save keys endpoint error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
+
+// Start Express Server
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`==================================================`);
+    console.log(`Content Machine Server running at http://localhost:${PORT}`);
+    console.log(`Open http://localhost:${PORT} in your browser to interact.`);
+    console.log(`==================================================`);
+  });
+}
+
+export default app;

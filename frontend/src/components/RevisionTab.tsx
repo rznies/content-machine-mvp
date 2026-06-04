@@ -59,14 +59,14 @@ export const RevisionTab: React.FC<RevisionTabProps> = ({
       } else {
         if (l1 !== undefined && l1.trim() !== '') {
           diffNodes.push(
-            <div key={`rem-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-rose-950/20 text-rose-450/90 border-l-2 border-rose-500/80 whitespace-pre-wrap leading-relaxed select-text">
+            <div key={`rem-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-error/10 text-error border-l-2 border-error whitespace-pre-wrap leading-relaxed select-text">
               -&nbsp;{l1}
             </div>
           );
         }
         if (l2 !== undefined && l2.trim() !== '') {
           diffNodes.push(
-            <div key={`add-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-emerald-950/20 text-emerald-450/90 border-l-2 border-emerald-500/80 whitespace-pre-wrap leading-relaxed select-text">
+            <div key={`add-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-success/10 text-success border-l-2 border-success whitespace-pre-wrap leading-relaxed select-text">
               +&nbsp;{l2}
             </div>
           );
@@ -147,13 +147,13 @@ export const RevisionTab: React.FC<RevisionTabProps> = ({
   };
 
   return (
-    <div className="space-y-5 select-none animate-in fade-in duration-300">
+    <div className="space-y-5 select-none animate-in fade-in duration-300 font-sans">
       
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 border-b border-zinc-800/40 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 border-b border-hairline pb-4 text-ink">
         <div>
-          <h3 className="text-sm font-bold text-foreground">Final Revision & Sign-off</h3>
-          <p className="text-xs text-zinc-500 mt-0.5 max-w-[65ch]">
+          <h3 className="text-sm font-bold font-serif text-ink">Final Revision & Sign-off</h3>
+          <p className="text-xs text-body mt-0.5 max-w-[65ch]">
             Polish the copy to make it perfect. Saving changes triggers the AI loop to extract style rules from your manual edits.
           </p>
         </div>
@@ -162,7 +162,7 @@ export const RevisionTab: React.FC<RevisionTabProps> = ({
           <button
             onClick={loadDrafts}
             disabled={loading || saving}
-            className="flex items-center gap-1.5 py-2 px-3 border border-zinc-800 hover:border-zinc-700 bg-zinc-950/60 rounded-xl text-xs font-semibold text-zinc-400 hover:text-foreground transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
+            className="flex items-center gap-1.5 py-2 px-3 border border-hairline hover:border-muted bg-canvas hover:bg-surface-soft rounded-md text-xs font-semibold text-body hover:text-ink transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
           >
             <ArrowCounterClockwise size={13} />
             <span>Reset Draft</span>
@@ -171,10 +171,10 @@ export const RevisionTab: React.FC<RevisionTabProps> = ({
           <button
             onClick={handleSaveDraft}
             disabled={draftSaving || saving || loading}
-            className="flex items-center gap-1.5 py-2 px-4 rounded-xl border border-zinc-800 hover:border-zinc-750 bg-zinc-900/60 hover:bg-zinc-900 text-zinc-300 hover:text-foreground font-semibold text-xs transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
+            className="flex items-center gap-1.5 py-2 px-4 rounded-md border border-hairline hover:border-muted bg-canvas hover:bg-surface-soft text-body hover:text-ink font-semibold text-xs transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
           >
             {draftSaving ? (
-              <ArrowsClockwise size={13} className="animate-spin text-zinc-500" />
+              <ArrowsClockwise size={13} className="animate-spin text-muted" />
             ) : (
               <FloppyDisk size={13} />
             )}
@@ -184,11 +184,11 @@ export const RevisionTab: React.FC<RevisionTabProps> = ({
           <button
             onClick={handlePublish}
             disabled={saving || loading || !draftText.trim()}
-            className="flex items-center gap-1.5 py-2 px-5 bg-primary hover:bg-primary/95 text-white font-semibold text-xs rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20 shrink-0 cursor-pointer"
+            className="flex items-center gap-1.5 py-2 px-4 bg-primary hover:bg-primary-active text-on-primary font-semibold text-xs rounded-md transition-all active:scale-[0.98] shadow-lg shadow-primary/20 shrink-0 cursor-pointer"
           >
             {saving ? (
               <>
-                <ArrowsClockwise size={13} className="animate-spin text-white" />
+                <ArrowsClockwise size={13} className="animate-spin text-on-primary" />
                 <span>Running Learning Loop...</span>
               </>
             ) : (
@@ -202,45 +202,45 @@ export const RevisionTab: React.FC<RevisionTabProps> = ({
       </div>
 
       {/* Editor Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[460px]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:h-[460px]">
         
         {/* Left Side: Original Draft (Read only) */}
-        <div className="glass-panel rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950/30 flex flex-col h-full shadow-lg">
-          <div className="p-4 border-b border-zinc-850 bg-zinc-950/40 flex items-center justify-between">
+        <div className="rounded-lg overflow-hidden border border-hairline bg-surface-card flex flex-col h-[300px] lg:h-full shadow-sm">
+          <div className="p-4 border-b border-hairline bg-surface-soft/40 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileCode className="w-4 h-4 text-zinc-500" />
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">Original AI Draft</span>
+              <FileCode className="w-4 h-4 text-muted" />
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted">Original AI Draft</span>
             </div>
-            <span className="text-[9px] text-zinc-600 bg-zinc-950 px-2 py-0.5 rounded border border-zinc-850">Read-Only</span>
+            <span className="text-[9px] text-muted bg-background px-2 py-0.5 rounded border border-hairline">Read-Only</span>
           </div>
-
-          <div className="p-5 flex-1 overflow-y-auto custom-scroll bg-zinc-950/10 max-h-[380px]">
+ 
+          <div className="p-5 flex-1 overflow-y-auto custom-scroll bg-background/50">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <ArrowsClockwise size={24} className="text-zinc-500 animate-spin" />
+                <ArrowsClockwise size={24} className="text-muted animate-spin" />
               </div>
             ) : aiDraft ? (
               renderDiff(aiDraft, draftText)
             ) : (
-              <p className="text-xs text-zinc-600 italic text-center py-20">Original draft not found.</p>
+              <p className="text-xs text-muted italic text-center py-20">Original draft not found.</p>
             )}
           </div>
         </div>
-
+ 
         {/* Right Side: Your Draft (Editable Textarea) */}
-        <div className="glass-panel rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950/40 flex flex-col h-full shadow-lg">
-          <div className="p-4 border-b border-zinc-850 bg-zinc-950/40 flex items-center justify-between">
+        <div className="rounded-lg overflow-hidden border border-hairline bg-surface-card flex flex-col h-[300px] lg:h-full shadow-sm">
+          <div className="p-4 border-b border-hairline bg-surface-soft/40 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" />
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">Your Final Polish</span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink">Your Final Polish</span>
             </div>
-            <span className="text-[9px] text-primary/75 bg-primary/5 px-2 py-0.5 rounded border border-primary/10">Interactive Editor</span>
+            <span className="text-[9px] text-primary/75 bg-primary/5 px-2 py-0.5 rounded border border-primary/20">Interactive Editor</span>
           </div>
-
-          <div className="flex-1 bg-zinc-950/10 max-h-[380px] relative">
+ 
+          <div className="flex-1 bg-background/50 relative">
             {loading ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/30">
-                <ArrowsClockwise size={24} className="text-zinc-500 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center bg-background/30">
+                <ArrowsClockwise size={24} className="text-muted animate-spin" />
               </div>
             ) : null}
             <textarea
@@ -248,7 +248,7 @@ export const RevisionTab: React.FC<RevisionTabProps> = ({
               onChange={(e) => setDraftText(e.target.value)}
               disabled={saving || loading}
               placeholder="Polishing editor window. Double click lines to rewrite or draft freely..."
-              className="w-full h-full bg-transparent border-0 outline-none p-5 text-xs text-zinc-300 font-sans leading-relaxed select-text resize-none placeholder-zinc-700"
+              className="w-full h-full bg-transparent border-0 outline-none p-5 text-xs text-ink font-sans leading-relaxed select-text resize-none placeholder-muted-soft"
             />
           </div>
         </div>

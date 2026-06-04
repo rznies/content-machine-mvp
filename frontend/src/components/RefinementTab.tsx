@@ -144,23 +144,23 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
   const voiceMatch = draft ? 85 + (wordCount % 11) : 0;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 select-none animate-in fade-in duration-300">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 select-none animate-in fade-in duration-300 font-sans">
       
       {/* Blueprint Column */}
       <div className="lg:col-span-1 space-y-5">
-        <div className="glass-panel p-5 rounded-2xl border border-zinc-800 bg-zinc-950/40 space-y-5 shadow-lg">
+        <div className="p-5 rounded-lg border border-hairline bg-surface-card space-y-5 text-ink shadow-sm">
           <div>
-            <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">Blueprint config</h3>
-            <p className="text-[10px] text-zinc-500 mt-0.5">Select channel targets and guides</p>
+            <h3 className="text-xs font-bold text-ink font-serif uppercase tracking-widest">Blueprint config</h3>
+            <p className="text-[10px] text-muted mt-0.5">Select channel targets and guides</p>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-zinc-400">Target Content Type</label>
+            <label className="text-[10px] font-semibold text-muted">Target Content Type</label>
             <select
               value={contentType}
               disabled={loading}
               onChange={(e) => setContentType(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-850 focus:border-primary rounded-xl py-2 px-3 text-xs text-foreground outline-none cursor-pointer transition-colors"
+              className="w-full bg-canvas border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md py-2 px-3 text-xs text-ink outline-none cursor-pointer transition-colors"
             >
               <option value="LinkedIn Post">LinkedIn Post (Text, messaging style)</option>
               <option value="X Thread">X / Twitter Thread (5-7 tweets)</option>
@@ -169,15 +169,15 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-zinc-400">Active Style Guide instructions</label>
-            <div className="p-3 bg-zinc-950/60 border border-zinc-850/50 rounded-xl text-[10px] text-zinc-400 font-mono max-h-32 overflow-y-auto leading-relaxed custom-scroll whitespace-pre-wrap">
+            <label className="text-[10px] font-semibold text-muted">Active Style Guide instructions</label>
+            <div className="p-3 bg-canvas border border-hairline rounded-md text-[10px] text-muted font-mono max-h-32 overflow-y-auto leading-relaxed custom-scroll whitespace-pre-wrap">
               {styleGuide}
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-zinc-400">Past Corrective Memory (Lessons)</label>
-            <div className="p-3 bg-zinc-950/60 border border-zinc-850/50 rounded-xl text-[10px] text-zinc-400 font-mono max-h-32 overflow-y-auto leading-relaxed custom-scroll whitespace-pre-wrap">
+            <label className="text-[10px] font-semibold text-muted">Past Corrective Memory (Lessons)</label>
+            <div className="p-3 bg-canvas border border-hairline rounded-md text-[10px] text-muted font-mono max-h-32 overflow-y-auto leading-relaxed custom-scroll whitespace-pre-wrap">
               {lessons}
             </div>
           </div>
@@ -186,7 +186,7 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
             <button
               onClick={handleDraft}
               disabled={loading}
-              className="w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-md shadow-primary/20 mt-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 px-4 rounded-md bg-primary hover:bg-primary-active text-on-primary font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-md mt-2 cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -208,20 +208,20 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
       <div className="lg:col-span-2 space-y-4">
         
         {/* Main Panel */}
-        <div className="glass-panel rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950/40 flex flex-col min-h-[460px] shadow-lg">
+        <div className="rounded-lg overflow-hidden border border-hairline bg-canvas flex flex-col min-h-[460px]">
           
           {/* Header */}
-          <div className="p-4 border-b border-zinc-850 bg-zinc-950/30 flex items-center justify-between">
+          <div className="p-4 border-b border-hairline bg-surface-soft flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" />
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">Draft Viewer</span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink">Draft Viewer</span>
             </div>
 
             {drafted && (
               <div className="flex items-center gap-4 text-[10px] font-medium">
                 <button 
                   onClick={() => setViewSource(!viewSource)}
-                  className="text-zinc-500 hover:text-foreground flex items-center gap-1 transition-colors cursor-pointer"
+                  className="text-muted hover:text-ink flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   {viewSource ? (
                     <>
@@ -238,7 +238,7 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
 
                 <button 
                   onClick={() => onNavigateToTab('settings')}
-                  className="text-zinc-500 hover:text-foreground flex items-center gap-1 transition-colors cursor-pointer"
+                  className="text-muted hover:text-ink flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <Gear size={12} />
                   <span>Edit voice rules</span>
@@ -249,17 +249,17 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
 
           {/* Stats Bar */}
           {drafted && draft && (
-            <div className="grid grid-cols-3 border-b border-zinc-850/60 bg-zinc-950/15 py-3 px-6 text-center divide-x divide-zinc-850/40">
+            <div className="grid grid-cols-3 border-b border-hairline bg-surface-card py-3 px-6 text-center divide-x divide-hairline">
               <div className="space-y-0.5">
-                <span className="text-[10px] text-zinc-500 block uppercase tracking-wider">Length</span>
-                <span className="text-xs font-semibold text-foreground">{wordCount} words</span>
+                <span className="text-[10px] text-muted block uppercase tracking-wider font-mono">Length</span>
+                <span className="text-xs font-semibold text-ink">{wordCount} words</span>
               </div>
               <div className="space-y-0.5">
-                <span className="text-[10px] text-zinc-500 block uppercase tracking-wider">Read Time</span>
-                <span className="text-xs font-semibold text-foreground">~{readTime} min</span>
+                <span className="text-[10px] text-muted block uppercase tracking-wider font-mono">Read Time</span>
+                <span className="text-xs font-semibold text-ink">~{readTime} min</span>
               </div>
               <div className="space-y-0.5">
-                <span className="text-[10px] text-zinc-500 block uppercase tracking-wider">Voice Match</span>
+                <span className="text-[10px] text-muted block uppercase tracking-wider font-mono">Voice Match</span>
                 <span className="text-xs font-semibold text-primary flex items-center justify-center gap-1">
                   <Sparkle size={12} weight="fill" />
                   <span>{voiceMatch}%</span>
@@ -269,25 +269,25 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
           )}
 
           {/* Draft Display */}
-          <div className="p-6 flex-1 overflow-y-auto custom-scroll max-h-[420px] bg-zinc-950/10">
+          <div className="p-6 flex-1 overflow-y-auto custom-scroll max-h-[420px] bg-canvas">
             {loading ? (
               <div className="flex flex-col items-center justify-center h-full text-center space-y-4 py-12">
                 <ArrowsClockwise size={28} className="text-primary animate-spin" />
-                <p className="text-xs text-zinc-500">Drafting using style guides and lessons...</p>
+                <p className="text-xs text-muted">Drafting using style guides and lessons...</p>
               </div>
             ) : draft ? (
               viewSource ? (
-                <pre className="text-[11px] text-zinc-400 font-mono leading-relaxed whitespace-pre-wrap select-text">
+                <pre className="text-[11px] text-body font-mono leading-relaxed whitespace-pre-wrap select-text">
                   {draft}
                 </pre>
               ) : (
-                <div className="text-xs text-zinc-300 font-sans leading-relaxed whitespace-pre-wrap select-text max-w-[65ch] prose dark:prose-invert">
+                <div className="text-xs text-body font-sans leading-relaxed whitespace-pre-wrap select-text max-w-[65ch] prose">
                   {draft}
                 </div>
               )
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center py-20">
-                <p className="text-xs text-zinc-500 italic max-w-xs leading-relaxed">
+                <p className="text-xs text-muted italic max-w-xs leading-relaxed">
                   Blueprint compiled draft pending. Click "Draft First Version" to combine templates and build the first iteration.
                 </p>
               </div>
@@ -300,7 +300,7 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
           <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
             <button
               onClick={handleAccept}
-              className="w-full sm:flex-1 py-3 px-6 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full sm:flex-1 py-3 px-6 rounded-md bg-primary hover:bg-primary-active text-on-primary font-semibold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
               <span>Accept and send to reviewers</span>
               <ArrowRight size={14} />
@@ -309,7 +309,7 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
             <div className="relative w-full sm:w-auto" ref={dropdownRef}>
               <button
                 onClick={() => setShowTryAgainMenu(!showTryAgainMenu)}
-                className="w-full sm:w-auto py-3 px-5 rounded-xl border border-zinc-800 hover:border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-zinc-300 hover:text-foreground font-semibold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
+                className="w-full sm:w-auto py-3 px-5 rounded-md border border-hairline hover:bg-surface-soft bg-canvas text-ink font-semibold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
               >
                 <ArrowCounterClockwise size={13} />
                 <span>Try again</span>
@@ -317,15 +317,15 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
               </button>
 
               {showTryAgainMenu && (
-                <div className="absolute right-0 bottom-full mb-2 w-56 rounded-xl border border-zinc-800 bg-zinc-950 p-1.5 shadow-xl z-30 animate-in fade-in slide-in-from-bottom-2 duration-155">
-                  <div className="px-2.5 py-1.5 text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+                <div className="absolute right-0 bottom-full mb-2 w-56 rounded-md border border-hairline bg-surface-card p-1.5 shadow-lg z-30 animate-in fade-in slide-in-from-bottom-2 duration-155">
+                  <div className="px-2.5 py-1.5 text-[9px] font-mono font-bold uppercase tracking-wider text-muted">
                     Regeneration directives
                   </div>
                   {TRY_AGAIN_OPTIONS.map((opt) => (
                     <button
                       key={opt.id}
                       onClick={() => handleTryAgain(opt.id)}
-                      className="w-full text-left py-2 px-2.5 rounded-lg text-xs text-zinc-400 hover:text-foreground hover:bg-zinc-900 transition-colors flex items-center justify-between cursor-pointer"
+                      className="w-full text-left py-2 px-2.5 rounded-md text-xs text-body hover:text-ink hover:bg-surface-soft transition-colors flex items-center justify-between cursor-pointer"
                     >
                       <span>{opt.label}</span>
                     </button>

@@ -23,7 +23,9 @@ import {
   Check, 
   User,
   Dot,
-  MagnifyingGlass
+  MagnifyingGlass,
+  List,
+  X
 } from '@phosphor-icons/react';
 import { clsx } from "clsx";
 
@@ -83,6 +85,7 @@ function App() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   interface CommandItem {
     id: string;
@@ -306,20 +309,46 @@ function App() {
   };
 
   return (
-    <div className="flex h-[100dvh] w-screen overflow-hidden bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-300">
+    <div className="flex h-[100dvh] w-screen overflow-hidden bg-canvas text-ink font-sans antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-300">
       
+      {/* Sidebar Navigation Drawer Backdrop on Mobile */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="w-60 border-r border-border bg-zinc-950/20 flex flex-col shrink-0 select-none">
+      <aside className={clsx(
+        "border-r border-hairline/10 bg-surface-dark flex flex-col shrink-0 select-none text-on-dark-soft transition-all duration-300",
+        // Desktop Layout: persistent 60w sidebar
+        "md:w-60 md:flex md:relative md:inset-auto md:translate-x-0 h-full",
+        // Mobile Layout: slide-out overlay drawer
+        "fixed inset-y-0 left-0 w-64 z-50 transform",
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
         
-        {/* Brand logo */}
-        <div className="flex items-center gap-3 p-5 border-b border-border">
-          <div className="flex h-7 w-7 items-center justify-center bg-primary text-white font-bold rounded-lg shadow-lg shadow-primary/20">
-            <Lightning weight="fill" className="w-4 h-4" />
+        {/* Brand logo & Close Button */}
+        <div className="flex items-center justify-between p-5 border-b border-hairline/10">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-transparent">
+              {/* Anthropic radial-spike mark */}
+              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current text-primary" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2.5c-.2 4.2-2.8 6.8-7 7 4.2.2 6.8 2.8 7 7 .2-4.2 2.8-6.8 7-7-4.2-.2-6.8-2.8-7-7z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-xs font-semibold tracking-tight text-on-dark uppercase">Content Machine</h1>
+              <p className="text-[8px] text-on-dark-soft font-mono tracking-widest uppercase">Media Pipeline</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xs font-semibold tracking-tight text-foreground">Content Machine</h1>
-            <p className="text-[9px] text-zinc-500 font-mono tracking-widest uppercase">Media Pipeline</p>
-          </div>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="md:hidden p-1.5 hover:text-on-dark hover:bg-surface-dark-soft text-on-dark-soft rounded-md transition-colors cursor-pointer"
+          >
+            <X size={16} />
+          </button>
         </div>
 
         {/* Sidebar Nav Items */}
@@ -327,10 +356,10 @@ function App() {
           {PHASES.map((phase) => (
             <div key={phase.name} className="space-y-1.5">
               <div className="px-2">
-                <span className="text-[9px] font-mono font-bold text-zinc-500 dark:text-zinc-600 tracking-widest block uppercase">
+                <span className="text-[9px] font-mono font-bold text-on-dark-soft/40 tracking-widest block uppercase">
                   {phase.name}
                 </span>
-                <span className="text-[8px] text-zinc-600 dark:text-zinc-700 block tracking-wide mt-0.5">
+                <span className="text-[8px] text-on-dark-soft/60 block tracking-wide mt-0.5">
                   {phase.label}
                 </span>
               </div>
@@ -345,15 +374,20 @@ function App() {
                   return (
                     <button
                       key={stepKey}
-                      onClick={() => !isLocked && setActiveTab(stepKey)}
+                      onClick={() => {
+                        if (!isLocked) {
+                          setActiveTab(stepKey);
+                          setIsSidebarOpen(false);
+                        }
+                      }}
                       disabled={isLocked}
                       title={isLocked ? "Pick an idea in the Vault first to unlock this step." : step.desc}
                       className={clsx(
-                        "w-full flex items-center justify-between py-1.5 px-2 rounded-lg transition-all text-xs font-medium relative group",
+                        "w-full flex items-center justify-between py-1.5 px-2 rounded-md transition-all text-xs font-medium relative group",
                         isSelected
-                          ? "bg-zinc-900/60 dark:bg-zinc-800/40 text-foreground border border-zinc-800/40"
-                          : "text-zinc-500 hover:text-zinc-300 dark:text-zinc-500 dark:hover:text-zinc-700 hover:bg-zinc-900/10 border border-transparent",
-                        isLocked && "opacity-40 cursor-not-allowed"
+                          ? "bg-surface-dark-elevated text-on-dark border border-hairline/10 shadow-sm"
+                          : "text-on-dark-soft hover:text-on-dark hover:bg-surface-dark-soft/40 border border-transparent",
+                        isLocked && "opacity-30 cursor-not-allowed"
                       )}
                     >
                       <span className="flex items-center gap-2.5 truncate">
@@ -375,35 +409,44 @@ function App() {
       </aside>
 
       {/* Main Content Workspace */}
-      <main className="flex-1 flex flex-col min-w-0 h-full relative bg-zinc-900/10">
+      <main className="flex-1 flex flex-col min-w-0 h-full relative bg-canvas">
         
         {/* Top Bar Navigation */}
-        <header className="h-14 border-b border-border bg-zinc-950/10 px-6 flex items-center justify-between select-none shrink-0 backdrop-blur-md">
-          {/* Left - Active Idea */}
-          <div className="flex items-center gap-2 max-w-[40%]">
-            <span className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">Idea:</span>
-            <div 
-              title={activeIdea ? activeIdea.title : "No active run"}
-              className={clsx(
-                "text-xs leading-none font-medium truncate max-w-xs",
-                activeIdea ? "text-primary hover:underline cursor-pointer" : "text-zinc-600 italic"
-              )}
-              onClick={() => activeIdea && setActiveTab('vault')}
+        <header className="h-14 border-b border-hairline bg-canvas/80 px-4 md:px-6 flex items-center justify-between select-none shrink-0 backdrop-blur-md sticky top-0 z-10">
+          {/* Left - Hamburger & Active Idea */}
+          <div className="flex items-center gap-2.5 max-w-[40%]">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-1.5 rounded-md hover:bg-surface-soft text-muted hover:text-ink cursor-pointer active:scale-95 transition-all"
+              title="Open menu"
             >
-              {activeIdea ? activeIdea.title : 'None selected'}
+              <List size={18} weight="bold" />
+            </button>
+            <div className="hidden sm:flex items-center gap-2 truncate">
+              <span className="text-[10px] text-muted font-mono tracking-widest uppercase">Idea:</span>
+              <div 
+                title={activeIdea ? activeIdea.title : "No active run"}
+                className={clsx(
+                  "text-xs leading-none font-medium truncate max-w-[120px] md:max-w-xs",
+                  activeIdea ? "text-primary hover:underline cursor-pointer" : "text-muted italic"
+                )}
+                onClick={() => activeIdea && setActiveTab('vault')}
+              >
+                {activeIdea ? activeIdea.title : 'None'}
+              </div>
             </div>
           </div>
 
           {/* Center - Active Tab Title */}
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold tracking-tight text-foreground">
+          <div className="flex items-center gap-2 md:gap-3">
+            <span className="text-xs md:text-sm font-semibold tracking-tight text-ink font-serif truncate max-w-[100px] sm:max-w-none">
               {STEP_DETAILS[activeTab]?.title}
             </span>
             <StatusPill />
           </div>
 
           {/* Right - Global Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
             
             {/* Theme Toggle */}
             <ThemeToggle />
@@ -413,13 +456,13 @@ function App() {
               onClick={() => setActiveTab('settings')}
               title="Settings"
               className={clsx(
-                "p-2 hover:bg-zinc-900 border rounded-xl transition-all duration-200 active:scale-95",
+                "p-2 border rounded-md transition-all duration-200 active:scale-95",
                 activeTab === 'settings'
-                  ? "bg-zinc-900 text-foreground border-zinc-800"
-                  : "text-zinc-400 hover:text-foreground border-transparent hover:border-zinc-800"
+                  ? "bg-surface-card text-ink border-hairline shadow-sm"
+                  : "text-muted hover:text-ink border-transparent hover:bg-surface-soft hover:border-hairline"
               )}
             >
-              <Gear size={18} weight={activeTab === 'settings' ? 'fill' : 'bold'} />
+              <Gear size={16} weight={activeTab === 'settings' ? 'fill' : 'bold'} />
             </button>
 
             {/* Activity Panel Bell */}
@@ -427,37 +470,37 @@ function App() {
               onClick={() => setIsActivityOpen(!isActivityOpen)}
               title="Activity log"
               className={clsx(
-                "p-2 hover:bg-zinc-900 border rounded-xl transition-all duration-200 active:scale-95 relative",
+                "p-2 border rounded-md transition-all duration-200 active:scale-95 relative",
                 isActivityOpen
-                  ? "bg-zinc-900 text-foreground border-zinc-800"
-                  : "text-zinc-400 hover:text-foreground border-transparent hover:border-zinc-800"
+                  ? "bg-surface-card text-ink border-hairline shadow-sm"
+                  : "text-muted hover:text-ink border-transparent hover:bg-surface-soft hover:border-hairline"
               )}
             >
-              <Bell size={18} weight={isActivityOpen ? 'fill' : 'bold'} />
+              <Bell size={16} weight={isActivityOpen ? 'fill' : 'bold'} />
               {unreadLogsCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white scale-90 border border-background">
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-on-primary scale-90 border border-canvas">
                   {unreadLogsCount}
                 </span>
               )}
             </button>
 
             {/* Profile Avatar (decorative) */}
-            <div className="h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 cursor-pointer hover:bg-zinc-800/80 transition-colors ml-1">
+            <div className="hidden sm:flex h-8 w-8 rounded-full bg-surface-card border border-hairline flex items-center justify-center text-muted cursor-pointer hover:bg-surface-soft transition-colors ml-1">
               <User size={14} weight="bold" />
             </div>
           </div>
         </header>
 
         {/* Content Workspace Area */}
-        <div className="flex-1 p-6 overflow-y-auto custom-scroll min-w-0 relative">
+        <div className="flex-1 p-4 md:p-6 overflow-y-auto custom-scroll min-w-0 relative">
           
           {/* Section Breadcrumb/Header */}
           {activeTab !== 'home' && activeTab !== 'settings' && (
-            <div className="mb-5 select-none pb-4 border-b border-zinc-800/30">
-              <h2 className="text-base font-semibold tracking-tight text-foreground flex items-center gap-2">
+            <div className="mb-6 select-none pb-4 border-b border-hairline/80">
+              <h2 className="text-lg font-serif tracking-tight text-ink flex items-center gap-2">
                 <span>Step {STEP_DETAILS[activeTab]?.index}: {STEP_DETAILS[activeTab]?.title}</span>
               </h2>
-              <p className="text-xs text-zinc-500 mt-1 max-w-[70ch]">
+              <p className="text-xs text-muted mt-1 max-w-[70ch] leading-relaxed">
                 {STEP_DETAILS[activeTab]?.desc}
               </p>
             </div>
@@ -476,10 +519,10 @@ function App() {
 
       {/* Command Palette Overlay */}
       {isCommandPaletteOpen && (
-        <div className="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[15dvh] px-4 animate-in fade-in duration-150">
-          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[400px] animate-in zoom-in-95 duration-150">
-            <div className="p-4 border-b border-zinc-800 flex items-center gap-3">
-              <MagnifyingGlass size={16} className="text-zinc-500" />
+        <div className="fixed inset-0 bg-surface-dark/70 backdrop-blur-sm z-50 flex items-start justify-center pt-[15dvh] px-4 animate-in fade-in duration-150">
+          <div className="bg-surface-dark border border-hairline/25 w-full max-w-lg rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[400px] animate-in zoom-in-95 duration-150">
+            <div className="p-4 border-b border-hairline/15 flex items-center gap-3">
+              <MagnifyingGlass size={16} className="text-on-dark-soft" />
               <input
                 autoFocus
                 type="text"
@@ -489,11 +532,11 @@ function App() {
                   setSelectedIndex(0);
                 }}
                 placeholder="Search actions and steps... (Esc to close)"
-                className="flex-1 bg-transparent border-0 outline-none text-xs text-foreground placeholder-zinc-500"
+                className="flex-1 bg-transparent border-0 outline-none text-xs text-on-dark placeholder-on-dark-soft/50"
               />
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scroll p-2">
+            <div className="flex-1 overflow-y-auto custom-scroll p-2 bg-surface-dark-soft/20">
               {filteredCommands.length > 0 ? (
                 filteredCommands.map((cmd, idx) => (
                   <button
@@ -502,16 +545,16 @@ function App() {
                     onClick={cmd.action}
                     onMouseEnter={() => setSelectedIndex(idx)}
                     className={clsx(
-                      "w-full text-left py-2.5 px-3.5 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer",
-                      idx === selectedIndex ? "bg-primary text-white" : "text-zinc-400 hover:text-foreground",
-                      cmd.disabled && "opacity-35 cursor-not-allowed"
+                      "w-full text-left py-2 px-3 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer",
+                      idx === selectedIndex ? "bg-primary text-on-primary shadow-sm" : "text-on-dark-soft hover:text-on-dark hover:bg-surface-dark-soft/60",
+                      cmd.disabled && "opacity-30 cursor-not-allowed"
                     )}
                   >
                     <span>{cmd.title}</span>
                     {cmd.shortcut && (
                       <kbd className={clsx(
                         "font-mono text-[9px] px-1.5 py-0.5 rounded border leading-none font-bold uppercase",
-                        idx === selectedIndex ? "border-white/20 bg-white/10 text-white" : "border-zinc-800 bg-zinc-950 text-zinc-500"
+                        idx === selectedIndex ? "border-on-primary/20 bg-on-primary/10 text-on-primary" : "border-hairline/20 bg-surface-dark text-on-dark-soft"
                       )}>
                         {cmd.shortcut}
                       </kbd>
@@ -519,11 +562,11 @@ function App() {
                   </button>
                 ))
               ) : (
-                <p className="text-xs text-zinc-500 italic text-center py-6">No commands found.</p>
+                <p className="text-xs text-on-dark-soft italic text-center py-6">No commands found.</p>
               )}
             </div>
             
-            <div className="p-3 bg-zinc-950/40 border-t border-zinc-800 text-[9px] text-zinc-500 font-medium flex justify-between items-center px-4">
+            <div className="p-3 bg-surface-dark-elevated border-t border-hairline/15 text-[9px] text-on-dark-soft font-medium flex justify-between items-center px-4">
               <span>Use &uarr;&darr; to navigate, Enter to select</span>
               <span>Esc to exit</span>
             </div>

@@ -9,6 +9,7 @@
     "dev:server": "node server.js",
     "dev:client": "npm run --prefix frontend dev",
     "build:client": "npm run --prefix frontend build",
+    "build": "npm run build:client",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "test": "node --test tests/*.test.js",
     "postinstall": "npm install --prefix frontend"

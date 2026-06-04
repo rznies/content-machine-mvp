@@ -34,85 +34,96 @@ export const HomeScreen: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-12 px-4 select-none animate-in fade-in slide-in-from-bottom-6 duration-500">
-      
-      {/* Welcome Card */}
-      <div className="glass-panel p-8 rounded-2xl border border-zinc-800 bg-zinc-950/40 text-center space-y-6 shadow-xl relative overflow-hidden">
+    <div className="max-w-5xl mx-auto py-8 md:py-16 px-4 md:px-6 select-none animate-in fade-in slide-in-from-bottom-6 duration-500 font-sans">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
         
-        {/* Glow effect */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="space-y-2 relative">
-          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-2">
-            <Sparkle size={20} weight="fill" className="animate-pulse" />
+        {/* Left column: Welcome Editorial Headline & Action Buttons */}
+        <div className="md:col-span-7 space-y-6 text-left">
+          <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
+            <Sparkle size={18} weight="fill" className="animate-pulse" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">
-            {activeIdea ? 'Ready to keep going?' : 'Welcome to Content Machine'}
-          </h2>
-          <p className="text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed">
-            {activeIdea 
-              ? "You've got an in-progress pipeline run. Continue writing or start something fresh."
-              : "We'll walk you through turning raw notes and chats into high-impact publication drafts."}
-          </p>
-        </div>
+          
+          <div className="space-y-4">
+            <h2 className="text-4xl md:text-5xl font-serif text-ink tracking-tight font-medium leading-none">
+              {activeIdea ? 'Ready to keep writing?' : 'Your automated thinking partner.'}
+            </h2>
+            <p className="text-sm text-body leading-relaxed max-w-md">
+              {activeIdea 
+                ? `You have an active, grounded pipeline run in progress: "${activeIdea.title}". Continue refining it or start something new.`
+                : 'Turn your raw ideas, voice transcripts, and reference materials into publication-grade essays, posts, and threads.'}
+            </p>
+          </div>
 
-        {/* Action CTAs */}
-        <div className="flex flex-col gap-3 max-w-sm mx-auto pt-2 relative">
-          {activeIdea ? (
-            <>
-              {/* Primary Continue Button */}
-              <button
-                onClick={() => setActiveTab('researcher')} // Start with Step 3 since Step 1 & 2 are done
-                className="w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] group cursor-pointer"
-              >
-                <span>Continue "{activeIdea.title}"</span>
-                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-              </button>
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            {activeIdea ? (
+              <>
+                <button
+                  onClick={() => setActiveTab('researcher')}
+                  className="py-2.5 px-5 rounded-md bg-primary hover:bg-primary-active text-on-primary font-semibold text-xs flex items-center justify-center gap-2 shadow-md shadow-primary/25 transition-all active:scale-[0.98] group cursor-pointer"
+                >
+                  <span>Continue "{activeIdea.title}"</span>
+                  <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                </button>
 
-              {/* Secondary Start New Button */}
+                <button
+                  onClick={handleStartNew}
+                  className="py-2.5 px-5 rounded-md bg-canvas hover:bg-surface-soft text-ink font-semibold text-xs border border-hairline transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>Start new idea</span>
+                </button>
+              </>
+            ) : (
               <button
                 onClick={handleStartNew}
-                className="w-full py-3 px-6 rounded-xl bg-zinc-900 hover:bg-zinc-800/80 text-zinc-300 font-semibold text-xs border border-zinc-850 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Plus size={14} />
-                <span>Start a new idea</span>
-              </button>
-            </>
-          ) : (
-            <>
-              {/* Primary Start New Button */}
-              <button
-                onClick={handleStartNew}
-                className="w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] group cursor-pointer"
+                className="py-2.5 px-5 rounded-md bg-primary hover:bg-primary-active text-on-primary font-semibold text-xs flex items-center justify-center gap-2 shadow-md shadow-primary/25 transition-all active:scale-[0.98] group cursor-pointer"
               >
                 <span>Start with a new idea</span>
                 <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
               </button>
-            </>
-          )}
+            )}
 
-          {/* Tertiary Vault Button */}
-          <button
-            onClick={() => setActiveTab('vault')}
-            className="w-full py-3 px-6 rounded-xl bg-transparent hover:bg-zinc-900/40 text-zinc-500 hover:text-zinc-400 font-semibold text-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer border border-transparent hover:border-zinc-900"
-          >
-            <FolderOpen size={14} />
-            <span>Browse Vault ({vaultCount} Ideas)</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('vault')}
+              className="py-2.5 px-5 rounded-md bg-transparent hover:bg-surface-soft/40 text-muted hover:text-ink font-semibold text-xs transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer border border-transparent hover:border-hairline"
+            >
+              <FolderOpen size={14} />
+              <span>Browse Vault ({vaultCount})</span>
+            </button>
+          </div>
         </div>
 
-        {/* Nudge Info Line */}
-        {vaultCount > 0 && (
-          <div className="pt-4 border-t border-zinc-900/60 flex items-center justify-center gap-4 text-[10px] text-zinc-500 font-mono tracking-wide relative">
-            <div>
-              <span className="font-semibold text-zinc-400">{vaultCount}</span> Qualified Ideas
+        {/* Right column: Premium Feature Card Mockup / Stat Container */}
+        <div className="md:col-span-5">
+          <div className="relative p-6 rounded-lg border border-hairline bg-surface-card text-ink space-y-6 shadow-sm overflow-hidden min-h-[250px] flex flex-col justify-between">
+            {/* Soft decorative background tint */}
+            <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-hairline/60">
+                <span className="text-[10px] font-mono tracking-widest text-muted uppercase font-bold">Pipeline Status</span>
+                <span className="flex items-center gap-1.5 h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <h5 className="text-[11px] font-mono font-bold text-muted uppercase">QUALIFIED IDEAS</h5>
+                  <p className="text-2xl font-serif font-medium text-ink mt-0.5">{vaultCount}</p>
+                </div>
+                <div>
+                  <h5 className="text-[11px] font-mono font-bold text-muted uppercase">STYLE RULES TAUGHT</h5>
+                  <p className="text-2xl font-serif font-medium text-ink mt-0.5">{metrics?.totalLessons || 0}</p>
+                </div>
+              </div>
             </div>
-            <span className="h-1 w-1 rounded-full bg-zinc-800" />
-            <div>
-              <span className="font-semibold text-zinc-400">{metrics?.totalLessons || 0}</span> Style Rules Learned
+
+            <div className="text-[10px] text-muted-soft font-mono leading-relaxed border-t border-hairline/60 pt-4 flex justify-between items-center">
+              <span>Status: Grounded Ready</span>
+              <span>v1.0.0-alpha</span>
             </div>
           </div>
-        )}
+        </div>
+
       </div>
     </div>
   );

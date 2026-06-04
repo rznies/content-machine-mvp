@@ -124,10 +124,10 @@ export const ActivityPanel: React.FC = () => {
   const panelContent = (
     <>
       {/* Header */}
-      <div className="p-4 border-b border-zinc-800 flex items-center justify-between shrink-0 bg-zinc-900/50">
+      <div className="p-4 border-b border-hairline/10 flex items-center justify-between shrink-0 bg-surface-dark">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-          <h3 className="text-sm font-semibold tracking-tight text-foreground">Activity</h3>
+          <h3 className="text-sm font-semibold tracking-tight text-on-dark font-sans">Activity</h3>
         </div>
         <div className="flex items-center gap-2">
           {/* Pin Button */}
@@ -135,8 +135,8 @@ export const ActivityPanel: React.FC = () => {
             onClick={() => setIsPinned(!isPinned)}
             title={isPinned ? "Unpin panel" : "Pin panel"}
             className={clsx(
-              "p-1.5 rounded-md transition-colors hover:bg-zinc-900 cursor-pointer",
-              isPinned ? "text-primary" : "text-zinc-500 hover:text-zinc-350"
+              "hidden md:inline-flex p-1.5 rounded-md transition-colors hover:bg-surface-dark-elevated cursor-pointer",
+              isPinned ? "text-primary" : "text-on-dark-soft hover:text-on-dark"
             )}
           >
             <PushPin size={15} weight={isPinned ? "fill" : "bold"} />
@@ -145,13 +145,13 @@ export const ActivityPanel: React.FC = () => {
           <button
             onClick={clearLogs}
             title="Clear history"
-            className="p-1.5 hover:text-rose-400 text-zinc-500 rounded-md transition-colors hover:bg-zinc-900 cursor-pointer"
+            className="p-1.5 hover:text-error text-on-dark-soft rounded-md transition-colors hover:bg-surface-dark-elevated cursor-pointer"
           >
             <Trash size={15} />
           </button>
           <button
             onClick={() => setIsActivityOpen(false)}
-            className="p-1.5 hover:text-foreground text-zinc-500 rounded-md transition-colors hover:bg-zinc-900 cursor-pointer"
+            className="p-1.5 hover:text-on-dark text-on-dark-soft rounded-md transition-colors hover:bg-surface-dark-elevated cursor-pointer"
           >
             <X size={15} />
           </button>
@@ -166,7 +166,7 @@ export const ActivityPanel: React.FC = () => {
           isAdvancedMode ? "h-1/2" : "h-full"
         )}>
           {sortedActivities.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-zinc-600 text-xs py-8 italic">
+            <div className="h-full flex flex-col items-center justify-center text-on-dark-soft/50 text-xs py-8 italic font-sans">
               No activity recorded yet.
             </div>
           ) : (
@@ -174,25 +174,25 @@ export const ActivityPanel: React.FC = () => {
               <div
                 key={idx}
                 className={clsx(
-                  "p-3 rounded-xl border transition-all duration-200 bg-zinc-900/40 hover:bg-zinc-900/70",
-                  act.type === 'error' ? 'border-rose-500/20' : 'border-zinc-900'
+                  "p-3 rounded-lg border transition-all duration-200 bg-surface-dark-soft/40 hover:bg-surface-dark-soft",
+                  act.type === 'error' ? 'border-error/20' : 'border-hairline/10'
                 )}
               >
                 <div className="flex justify-between items-start gap-2">
-                  <span className="text-[10px] font-mono text-zinc-600 tracking-wider">
+                  <span className="text-[10px] font-mono text-on-dark-soft/40 tracking-wider">
                     {act.timestamp}
                   </span>
                   <span className={clsx(
                     "text-[9px] font-mono uppercase px-1.5 py-0.5 rounded-md font-semibold tracking-wider",
-                    act.type === 'success' && 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/10',
-                    act.type === 'error' && 'bg-rose-500/10 text-rose-400 border border-rose-500/10',
-                    act.type === 'warning' && 'bg-amber-500/10 text-amber-400 border border-amber-500/10',
-                    act.type === 'info' && 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                    act.type === 'success' && 'bg-success/15 text-success border border-success/10',
+                    act.type === 'error' && 'bg-error/15 text-error border border-error/10',
+                    act.type === 'warning' && 'bg-accent-amber/15 text-accent-amber border border-accent-amber/10',
+                    act.type === 'info' && 'bg-surface-dark-elevated text-on-dark-soft border border-hairline/10'
                   )}>
                     {act.actor}
                   </span>
                 </div>
-                <p className="text-xs text-zinc-350 leading-normal mt-2 select-text font-normal">
+                <p className="text-xs text-on-dark-soft/80 leading-normal mt-2 select-text font-normal">
                   {act.action}
                 </p>
                 {act.stepLink && (
@@ -201,7 +201,7 @@ export const ActivityPanel: React.FC = () => {
                       setActiveTab(act.stepLink!);
                       setIsActivityOpen(false);
                     }}
-                    className="mt-2.5 inline-flex items-center gap-1 text-[10px] text-primary font-medium hover:underline hover:text-primary/80 transition-colors cursor-pointer"
+                    className="mt-2.5 inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary-active font-medium hover:underline transition-colors cursor-pointer"
                   >
                     <span>Go to {act.stepLabel}</span>
                     <ArrowUpRight size={10} />
@@ -214,27 +214,27 @@ export const ActivityPanel: React.FC = () => {
 
         {/* Technical Log (Console Terminal Split) */}
         {isAdvancedMode && (
-          <div className="h-1/2 border-t border-zinc-800 flex flex-col min-h-0 bg-black">
-            <div className="px-4 py-2 border-b border-zinc-900 bg-zinc-950 flex items-center gap-2 select-none text-[10px] font-mono font-semibold tracking-widest text-zinc-500">
+          <div className="h-1/2 border-t border-hairline/10 flex flex-col min-h-0 bg-surface-dark-soft">
+            <div className="px-4 py-2 border-b border-hairline/10 bg-surface-dark flex items-center gap-2 select-none text-[10px] font-mono font-semibold tracking-widest text-on-dark-soft">
               <TerminalWindow size={12} />
               <span>RAW EVENTS</span>
             </div>
-            <div className="flex-1 p-3 overflow-y-auto font-mono text-[10px] leading-relaxed text-zinc-400 custom-scroll select-text">
+            <div className="flex-1 p-3 overflow-y-auto font-mono text-[10px] leading-relaxed text-on-dark-soft custom-scroll select-text">
               {logs.length === 0 ? (
-                <div className="text-zinc-700 italic select-none">Console empty.</div>
+                <div className="text-on-dark-soft/40 italic select-none">Console empty.</div>
               ) : (
                 logs.map((log, idx) => {
-                  let color = 'text-zinc-500';
-                  if (log.type === 'success') color = 'text-emerald-500';
-                  if (log.type === 'warning') color = 'text-amber-500';
-                  if (log.type === 'error') color = 'text-rose-500';
+                  let color = 'text-on-dark-soft/60';
+                  if (log.type === 'success') color = 'text-success';
+                  if (log.type === 'warning') color = 'text-accent-amber';
+                  if (log.type === 'error') color = 'text-error';
                   return (
                     <div key={idx} className="flex gap-2 py-0.5 hover:bg-white/5 transition-colors">
-                      <span className="text-zinc-700 shrink-0 select-none">{log.time}</span>
+                      <span className="text-on-dark-soft/30 shrink-0 select-none">{log.time}</span>
                       <span className={clsx(color, "shrink-0 select-none uppercase font-bold w-[6ch]")}>
                         {log.type}
                       </span>
-                      <span className="text-zinc-300 break-all">{log.message}</span>
+                      <span className="text-on-dark break-all">{log.message}</span>
                     </div>
                   );
                 })
@@ -246,19 +246,19 @@ export const ActivityPanel: React.FC = () => {
       </div>
 
       {/* Footer Control */}
-      <div className="p-3 border-t border-zinc-800 shrink-0 bg-zinc-900/50 flex justify-between items-center select-none">
+      <div className="p-3 border-t border-hairline/10 shrink-0 bg-surface-dark flex justify-between items-center select-none">
         <button
           onClick={() => setIsAdvancedMode(!isAdvancedMode)}
           className={clsx(
             "px-3 py-1 text-[10px] font-mono rounded-md border transition-all active:scale-[0.98] cursor-pointer",
             isAdvancedMode
               ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
-              : "bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-zinc-400"
+              : "bg-surface-dark-elevated text-on-dark-soft border-hairline/10 hover:text-on-dark hover:bg-surface-dark-soft"
           )}
         >
           {isAdvancedMode ? 'Hide Technical Log' : 'Show Technical Log'}
         </button>
-        <div className="text-[10px] text-zinc-650 font-mono tracking-wider">
+        <div className="text-[10px] text-on-dark-soft/40 font-mono tracking-wider">
           Press Cmd+. to toggle
         </div>
       </div>
@@ -276,24 +276,42 @@ export const ActivityPanel: React.FC = () => {
               animate={{ opacity: 0.4 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsActivityOpen(false)}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-surface-dark/60 backdrop-blur-sm"
             />
           )}
 
           {/* Panel Container */}
           {isPinned ? (
-            <div
-              className="w-80 h-full border-l border-zinc-800 bg-zinc-950/95 flex flex-col overflow-hidden shrink-0 z-20"
-            >
-              {panelContent}
-            </div>
+            <>
+              {/* Desktop Pinned */}
+              <div
+                className="hidden md:flex w-80 h-full border-l border-hairline/10 bg-surface-dark flex-col overflow-hidden shrink-0 z-20"
+              >
+                {panelContent}
+              </div>
+              {/* Mobile Floating Drawer Fallback */}
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+                className="fixed md:hidden right-0 top-0 bottom-0 z-50 w-full max-w-[320px] bg-surface-dark border-l border-hairline/10 shadow-2xl flex flex-col overflow-hidden"
+              >
+                {panelContent}
+              </motion.div>
+              {/* Mobile Backdrop */}
+              <div 
+                onClick={() => setIsActivityOpen(false)}
+                className="fixed inset-0 z-40 bg-surface-dark/60 backdrop-blur-sm md:hidden"
+              />
+            </>
           ) : (
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed right-0 top-1/2 -translate-y-1/2 z-50 w-80 h-[85vh] mr-4 bg-zinc-950/95 border border-zinc-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-md"
+              className="fixed right-0 top-1/2 -translate-y-1/2 z-50 w-80 h-[85vh] md:mr-4 bg-surface-dark border border-hairline/10 rounded-xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-md"
             >
               {panelContent}
             </motion.div>

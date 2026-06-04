@@ -1,79 +1,110 @@
-@import "@fontsource/geist-sans/400.css";
-@import "@fontsource/geist-sans/500.css";
-@import "@fontsource/geist-sans/600.css";
-@import "@fontsource/geist-sans/700.css";
-@import "@fontsource/geist-mono/400.css";
-@import "@fontsource/geist-mono/500.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* True Off-Black Background */
-    --background: 0 0% 3%;
-    --foreground: 0 0% 98%;
+  :root, .light {
+    /* Brand Accent */
+    --primary: #cc785c;
+    --primary-active: #a9583e;
+    --primary-disabled: #e6dfd8;
+    
+    /* Branding and Surfaces */
+    --ink: #141413;
+    --body: #3d3d3a;
+    --body-strong: #252523;
+    --muted: #6c6a64;
+    --muted-soft: #8e8b82;
+    --hairline: #e6dfd8;
+    --hairline-soft: #ebe6df;
+    --canvas: #faf9f5;
+    --surface-soft: #f5f0e8;
+    --surface-card: #efe9de;
+    --surface-cream-strong: #e8e0d2;
+    --surface-dark: #181715;
+    --surface-dark-elevated: #252320;
+    --surface-dark-soft: #1f1e1b;
+    --on-primary: #ffffff;
+    --on-dark: #faf9f5;
+    --on-dark-soft: #a09d96;
+    --accent-teal: #5db8a6;
+    --accent-amber: #e8a55a;
+    --success: #5db872;
+    --warning: #d4a017;
+    --error: #c64545;
 
-    --card: 0 0% 3%;
-    --card-foreground: 0 0% 98%;
+    /* Theme Layout Compatibility Maps */
+    --background: var(--canvas);
+    --foreground: var(--ink);
+    --border: var(--hairline);
+    --card: var(--surface-card);
+    --card-foreground: var(--ink);
+    --popover: var(--canvas);
+    --popover-foreground: var(--ink);
+    --destructive: var(--error);
+    --destructive-foreground: var(--on-primary);
+    --ring: var(--primary);
+    --input: var(--hairline);
 
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 98%;
-
-    /* Electric Blue Accent */
-    --primary: 220 100% 50%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 9%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 0 0% 9%;
-    --muted-foreground: 0 0% 60%;
-
-    --accent: 220 100% 50%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 220 100% 50%;
-
-    --radius: 0.75rem;
+    /* Shape Radii */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius: 12px; /* standard component fallback */
   }
 
-  .light {
-    /* Warm Off-White Background */
-    --background: 60 9% 97.5%;
-    --foreground: 0 0% 10%;
+  .dark {
+    /* Brand Accent */
+    --primary: #cc785c;
+    --primary-active: #a9583e;
+    --primary-disabled: #32302c;
+    
+    /* Branding and Surfaces in dark-contrast modes */
+    --ink: #faf9f5;
+    --body: #a09d96;
+    --body-strong: #faf9f5;
+    --muted: #8e8b82;
+    --muted-soft: #6c6a64;
+    --hairline: #252320;
+    --hairline-soft: #1f1e1b;
+    --canvas: #181715;
+    --surface-soft: #1f1e1b;
+    --surface-card: #252320;
+    --surface-cream-strong: #2d2b27;
+    --surface-dark: #0f0e0d;
+    --surface-dark-elevated: #1c1a18;
+    --surface-dark-soft: #141312;
+    --on-primary: #ffffff;
+    --on-dark: #faf9f5;
+    --on-dark-soft: #a09d96;
+    --accent-teal: #5db8a6;
+    --accent-amber: #e8a55a;
+    --success: #5db872;
+    --warning: #d4a017;
+    --error: #c64545;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    /* Theme Layout Compatibility Maps */
+    --background: var(--canvas);
+    --foreground: var(--ink);
+    --border: var(--hairline);
+    --card: var(--surface-card);
+    --card-foreground: var(--ink);
+    --popover: var(--canvas);
+    --popover-foreground: var(--ink);
+    --destructive: var(--error);
+    --destructive-foreground: var(--on-primary);
+    --ring: var(--primary);
+    --input: var(--hairline);
 
-    --popover: 0 0% 98%;
-    --popover-foreground: 0 0% 10%;
-
-    /* Electric Blue Accent */
-    --primary: 220 100% 45%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 92%;
-    --secondary-foreground: 0 0% 10%;
-
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 45%;
-
-    --accent: 220 100% 45%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 86%;
-    --input: 0 0% 86%;
-    --ring: 220 100% 45%;
+    /* Shape Radii */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius: 12px; /* standard component fallback */
   }
 }
 

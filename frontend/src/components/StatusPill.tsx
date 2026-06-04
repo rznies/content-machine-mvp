@@ -10,27 +10,27 @@ export const StatusPill: React.FC = () => {
       case 'ready':
         return {
           text: 'Ready',
-          className: 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border-emerald-500/20'
+          className: 'bg-success/10 text-success border-success/20'
         };
       case 'working':
         return {
           text: 'Working…',
-          className: 'bg-blue-500/10 text-blue-500 dark:text-blue-400 border-blue-500/20 animate-pulse'
+          className: 'bg-accent-teal/10 text-accent-teal border-accent-teal/20 animate-pulse'
         };
       case 'needs_you':
         return {
           text: 'Needs you',
-          className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+          className: 'bg-accent-amber/10 text-accent-amber border-accent-amber/20'
         };
       case 'error':
         return {
           text: 'Something went wrong',
-          className: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+          className: 'bg-error/10 text-error border-error/20'
         };
       case 'done':
         return {
           text: 'Done!',
-          className: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30'
+          className: 'bg-success/15 text-success border-success/35'
         };
     }
   };

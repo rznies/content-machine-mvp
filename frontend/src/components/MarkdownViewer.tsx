@@ -16,25 +16,24 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
 
-    // Headings
-    html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-extrabold text-primary-400 mt-6 mb-3 tracking-tight border-b border-gray-800 pb-2">$1</h1>');
-    html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-primary-300 mt-5 mb-2.5">$1</h2>');
-    html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold text-primary-200 mt-4 mb-2">$1</h3>');
+    // Headings (Serif displayed Copernicus fallbacks)
+    html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-serif text-ink font-medium mt-6 mb-3 tracking-tight border-b border-hairline pb-2">$1</h1>');
+    html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-serif text-ink font-medium mt-5 mb-2.5 tracking-tight">$1</h2>');
+    html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-serif text-ink font-medium mt-4 mb-2 tracking-tight">$1</h3>');
 
     // Bullet points
-    // We match lines starting with * or - and space
-    html = html.replace(/^\* (.*$)/gim, '<li class="text-gray-300 ml-4 list-disc my-1">$1</li>');
-    html = html.replace(/^- (.*$)/gim, '<li class="text-gray-300 ml-4 list-disc my-1">$1</li>');
+    html = html.replace(/^\* (.*$)/gim, '<li class="text-body ml-4 list-disc my-1 font-sans text-sm leading-relaxed">$1</li>');
+    html = html.replace(/^- (.*$)/gim, '<li class="text-body ml-4 list-disc my-1 font-sans text-sm leading-relaxed">$1</li>');
 
     // Bold & Italics
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
-    html = html.replace(/\*(.*?)\*/g, '<em class="italic text-gray-200">$1</em>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-body-strong">$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em class="italic text-body">$1</em>');
 
     // Inline Code
-    html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-800/80 text-primary-300 border border-gray-700/50 px-1.5 py-0.5 rounded font-mono text-xs">$1</code>');
+    html = html.replace(/`([^`]+)`/g, '<code class="bg-surface-dark-soft/20 text-accent-amber border border-hairline/60 px-1.5 py-0.5 rounded font-mono text-[13px]">$1</code>');
 
     // Line breaks
-    html = html.replace(/\n\n/g, '<p class="my-3 text-gray-300 leading-relaxed"></p>');
+    html = html.replace(/\n\n/g, '<p class="my-3 text-body font-sans text-sm leading-relaxed"></p>');
     html = html.replace(/\n/g, '<br class="my-0.5" />');
 
     return html;
@@ -44,7 +43,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
 
   return (
     <div 
-      className={`prose prose-invert max-w-none text-gray-300 leading-relaxed select-text ${className}`}
+      className={`prose max-w-none text-body font-sans text-sm leading-relaxed select-text ${className}`}
       dangerouslySetInnerHTML={{ __html: parsedHtml }}
     />
   );

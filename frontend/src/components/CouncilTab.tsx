@@ -100,7 +100,7 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
       if (l1 === l2) {
         if (l1 !== undefined && l1.trim() !== '') {
           diffNodes.push(
-            <div key={`same-${i}`} className="font-mono text-[10.5px] text-zinc-500 py-0.5 px-3 whitespace-pre-wrap leading-relaxed select-text">
+            <div key={`same-${i}`} className="font-mono text-[10.5px] text-muted py-0.5 px-3 whitespace-pre-wrap leading-relaxed select-text">
               &nbsp;&nbsp;{l1}
             </div>
           );
@@ -108,14 +108,14 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
       } else {
         if (l1 !== undefined && l1.trim() !== '') {
           diffNodes.push(
-            <div key={`rem-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-rose-950/20 text-rose-400/90 border-l-2 border-rose-500/80 whitespace-pre-wrap leading-relaxed select-text">
+            <div key={`rem-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-error/10 text-error border-l-2 border-error whitespace-pre-wrap leading-relaxed select-text">
               -&nbsp;{l1}
             </div>
           );
         }
         if (l2 !== undefined && l2.trim() !== '') {
           diffNodes.push(
-            <div key={`add-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-emerald-950/20 text-emerald-400/90 border-l-2 border-emerald-500/80 whitespace-pre-wrap leading-relaxed select-text">
+            <div key={`add-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-success/10 text-success border-l-2 border-success whitespace-pre-wrap leading-relaxed select-text">
               +&nbsp;{l2}
             </div>
           );
@@ -123,7 +123,7 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
       }
     }
 
-    return <div className="space-y-0.5 py-2 max-h-64 overflow-y-auto custom-scroll border border-zinc-850/60 rounded-xl bg-zinc-950/20">{diffNodes}</div>;
+    return <div className="space-y-0.5 py-2 max-h-64 overflow-y-auto custom-scroll border border-hairline rounded-lg bg-surface-soft/40">{diffNodes}</div>;
   };
 
   // Helper to get reviewer's mock role
@@ -140,16 +140,16 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 select-none animate-in fade-in duration-300">
+    <div className="space-y-6 select-none animate-in fade-in duration-300 font-sans">
       
       {/* Control Banner */}
-      <div className="glass-panel p-6 rounded-2xl border border-zinc-800 bg-zinc-950/40 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg">
+      <div className="p-6 rounded-lg border border-hairline bg-surface-card flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm text-ink">
         <div className="space-y-1">
-          <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+          <h3 className="text-sm font-bold font-serif text-ink flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-primary" />
             <span>Polish draft</span>
           </h3>
-          <p className="text-xs text-zinc-500 max-w-[65ch] leading-relaxed">
+          <p className="text-xs text-body max-w-[65ch] leading-relaxed">
             Convenes 6 expert reviewer personas. Automatically edits, evaluates, and revision-loops the draft until it scores &ge; 9/10.
           </p>
         </div>
@@ -157,7 +157,7 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
         <button
           onClick={handleReview}
           disabled={loading || (finalScore !== null && !revealFinished)}
-          className="flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl bg-primary hover:bg-primary/95 disabled:opacity-40 text-white font-semibold text-xs transition-colors shadow-md shadow-primary/20 active:scale-95 whitespace-nowrap self-start md:self-auto cursor-pointer"
+          className="flex items-center justify-center gap-2 py-2 px-4 rounded-md bg-primary hover:bg-primary-active disabled:opacity-40 text-on-primary font-semibold text-xs transition-colors shadow-md shadow-primary/20 active:scale-95 whitespace-nowrap self-start md:self-auto cursor-pointer"
         >
           {loading ? (
             <>
@@ -180,8 +180,8 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
 
       {/* Review Timeline & Progress Indicator */}
       {(loading || (iterations.length > 0 && !revealFinished)) && (
-        <div className="glass-panel p-6 rounded-2xl border border-zinc-800 bg-zinc-950/40 text-center space-y-4">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+        <div className="p-6 rounded-lg border border-hairline bg-surface-card text-center space-y-4 text-ink shadow-sm">
+          <h4 className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted">
             6 expert reviewers are reading your draft.
           </h4>
           <div className="flex justify-center gap-2">
@@ -193,7 +193,7 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
                   key={idx} 
                   className={clsx(
                     "h-1.5 w-10 rounded-full transition-all duration-300",
-                    active ? "bg-primary" : current ? "bg-primary/50 animate-pulse" : "bg-zinc-800"
+                    active ? "bg-primary" : current ? "bg-primary/50 animate-pulse" : "bg-hairline"
                   )}
                 />
               );
@@ -204,14 +204,14 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
 
       {/* Results Area */}
       {iterations.length > 0 && visibleReviewerCount > 0 && lastIteration && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-550">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
           
           {/* Left Columns - Scores and Breakdown */}
           <div className="lg:col-span-2 space-y-6">
             
             {/* Reviews Cards */}
-            <div className="glass-panel p-5 rounded-2xl border border-zinc-800 bg-zinc-950/40">
-              <h4 className="font-bold text-foreground text-[10px] uppercase tracking-wider mb-4">
+            <div className="p-5 rounded-lg border border-hairline bg-surface-card text-ink shadow-sm">
+              <h4 className="font-mono font-bold text-muted text-[10px] uppercase tracking-wider mb-4">
                 Reviewer Evaluation Breakdown
               </h4>
               
@@ -219,15 +219,15 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
                 {lastIteration.reviews.slice(0, visibleReviewerCount).map((rev) => (
                   <div 
                     key={rev.name} 
-                    className="p-4 bg-zinc-950 border border-zinc-850/50 rounded-xl flex flex-col justify-between h-32 hover:border-zinc-800 transition-colors animate-in zoom-in-95 duration-200"
+                    className="p-4 bg-background border border-hairline/60 rounded-md flex flex-col justify-between h-32 hover:border-hairline transition-colors animate-in zoom-in-95 duration-200"
                   >
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-foreground truncate">{rev.name}</span>
-                        <span className="text-[10px] font-bold text-primary">{rev.score}</span>
+                        <span className="font-bold text-xs text-ink truncate">{rev.name}</span>
+                        <span className="text-[11px] font-mono font-bold text-primary">{rev.score}</span>
                       </div>
-                      <span className="text-[9px] text-zinc-500 font-mono block mt-0.5">{getReviewerRole(rev.name)}</span>
-                      <p className="text-[10px] text-zinc-400 line-clamp-2 mt-2 leading-relaxed italic">
+                      <span className="text-[9px] text-muted font-mono block mt-0.5">{getReviewerRole(rev.name)}</span>
+                      <p className="text-[10px] text-body line-clamp-2 mt-2 leading-relaxed italic">
                         "{rev.feedback}"
                       </p>
                     </div>
@@ -236,28 +236,28 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
 
                 {/* Final Score Card */}
                 {revealFinished && (
-                  <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex flex-col justify-between items-center text-center h-32 animate-in zoom-in-95 duration-300">
-                    <span className="text-[9px] font-bold text-primary uppercase tracking-wider">Average Score</span>
+                  <div className="p-4 bg-primary/5 border border-primary/20 rounded-md flex flex-col justify-between items-center text-center h-32 animate-in zoom-in-95 duration-300">
+                    <span className="text-[9px] font-mono font-bold text-primary uppercase tracking-wider">Average Score</span>
                     <div className="my-auto">
-                      <span className="text-3xl font-black text-primary">{lastIteration.score.toFixed(1)}</span>
+                      <span className="text-3xl font-serif font-black text-primary">{lastIteration.score.toFixed(1)}</span>
                       <span className="text-xs text-primary/60 font-bold"> / 10</span>
                     </div>
-                    <span className="text-[8px] text-zinc-500 font-medium">Goal score reached (&ge; 9.0)</span>
+                    <span className="text-[8px] text-muted font-medium">Goal score reached (&ge; 9.0)</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Diffs & Fixes (Only when animation finishes) */}
+            {/* Revisions & Fixes (Only when animation finishes) */}
             {revealFinished && (
               <>
                 {/* Diff Viewer Card */}
-                <div className="glass-panel p-5 rounded-2xl border border-zinc-800 bg-zinc-950/40 space-y-3">
+                <div className="p-5 rounded-lg border border-hairline bg-surface-card text-ink shadow-sm space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-foreground text-[10px] uppercase tracking-wider">
+                    <h4 className="font-serif font-medium text-ink text-sm">
                       Here's what changed in revision {lastIteration.iteration}
                     </h4>
-                    <span className="text-[9px] text-zinc-500 font-mono">Iteration 1 &rarr; {lastIteration.iteration}</span>
+                    <span className="text-[9px] text-muted font-mono">Iteration 1 &rarr; {lastIteration.iteration}</span>
                   </div>
                   {renderDiff(firstIteration?.draft, lastIteration?.draft)}
                 </div>
@@ -265,31 +265,31 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
                 {/* Auto revised lists */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Revisions made */}
-                  <div className="glass-panel p-5 rounded-2xl border border-zinc-800 bg-zinc-950/40 space-y-3">
-                    <h4 className="font-bold text-[10px] text-foreground uppercase tracking-wider flex items-center gap-1.5 border-b border-zinc-850 pb-2">
+                  <div className="p-5 rounded-lg border border-hairline bg-surface-card text-ink shadow-sm space-y-3">
+                    <h4 className="font-bold text-[10px] text-ink uppercase font-mono tracking-wider flex items-center gap-1.5 border-b border-hairline/60 pb-2">
                       <PenNib className="w-3.5 h-3.5 text-primary" />
                       <span>Auto-Revised Fixes</span>
                     </h4>
-                    <ul className="space-y-2 max-h-40 overflow-y-auto custom-scroll text-[11px] text-zinc-400 pl-4 list-disc leading-relaxed">
+                    <ul className="space-y-2 max-h-40 overflow-y-auto custom-scroll text-[11px] text-body pl-4 list-disc leading-relaxed">
                       {lastIteration.editorialFixes.length > 0 ? (
                         lastIteration.editorialFixes.map((fix, idx) => <li key={idx}>{fix}</li>)
                       ) : (
-                        <li className="list-none text-zinc-500 italic pl-0">No automated editorial revisions made.</li>
+                        <li className="list-none text-muted italic pl-0">No automated editorial revisions made.</li>
                       )}
                     </ul>
                   </div>
 
                   {/* Info Gaps */}
-                  <div className="glass-panel p-5 rounded-2xl border border-zinc-800 bg-zinc-950/40 space-y-3">
-                    <h4 className="font-bold text-[10px] text-foreground uppercase tracking-wider flex items-center gap-1.5 border-b border-zinc-850 pb-2">
-                      <Warning className="w-3.5 h-3.5 text-amber-500" />
+                  <div className="p-5 rounded-lg border border-hairline bg-surface-card text-ink shadow-sm space-y-3">
+                    <h4 className="font-bold text-[10px] text-ink uppercase font-mono tracking-wider flex items-center gap-1.5 border-b border-hairline/60 pb-2">
+                      <Warning className="w-3.5 h-3.5 text-accent-amber" />
                       <span>Creator Gaps Detected</span>
                     </h4>
-                    <ul className="space-y-2 max-h-40 overflow-y-auto custom-scroll text-[11px] text-zinc-400 pl-4 list-disc leading-relaxed">
+                    <ul className="space-y-2 max-h-40 overflow-y-auto custom-scroll text-[11px] text-body pl-4 list-disc leading-relaxed">
                       {lastIteration.infoGaps.length > 0 ? (
-                        lastIteration.infoGaps.map((gap, idx) => <li key={idx} className="text-amber-200/90">{gap}</li>)
+                        lastIteration.infoGaps.map((gap, idx) => <li key={idx} className="text-primary">{gap}</li>)
                       ) : (
-                        <li className="list-none text-emerald-500 italic pl-0">None. Draft is fully aligned with raw metrics.</li>
+                        <li className="list-none text-success italic pl-0">None. Draft is fully aligned with raw metrics.</li>
                       )}
                     </ul>
                   </div>
@@ -302,8 +302,8 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
           {/* Right Column - Revision History Timeline */}
           {revealFinished && (
             <div className="lg:col-span-1">
-              <div className="glass-panel p-5 rounded-2xl border border-zinc-800 bg-zinc-950/40 h-full flex flex-col min-h-[350px] shadow-lg">
-                <h4 className="font-bold text-foreground text-[10px] uppercase tracking-wider mb-4 border-b border-zinc-850 pb-2 flex items-center gap-1.5">
+              <div className="p-5 rounded-lg border border-hairline bg-surface-card text-ink h-full flex flex-col min-h-[350px] shadow-sm">
+                <h4 className="font-bold text-ink text-[10px] uppercase font-mono tracking-wider mb-4 border-b border-hairline/60 pb-2 flex items-center gap-1.5">
                   <ClockCounterClockwise size={13} />
                   <span>Revision Loop History</span>
                 </h4>
@@ -312,16 +312,16 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
                   {iterations.map((iter) => (
                     <div 
                       key={iter.iteration} 
-                      className="p-3 bg-zinc-950 border border-zinc-850 hover:border-zinc-800 rounded-xl space-y-2 transition-colors duration-150"
+                      className="p-3 bg-background border border-hairline/60 hover:border-hairline rounded-md space-y-2 transition-colors duration-150"
                     >
-                      <div className="flex items-center justify-between text-xs font-semibold text-foreground">
+                      <div className="flex items-center justify-between text-xs font-semibold text-ink">
                         <span>Iteration #{iter.iteration}</span>
-                        <span className="text-primary font-bold">{iter.score.toFixed(1)}/10</span>
+                        <span className="text-primary font-mono font-bold">{iter.score.toFixed(1)}/10</span>
                       </div>
-                      <p className="text-[9px] text-zinc-500">
+                      <p className="text-[9px] text-muted">
                         Revisions: {iter.editorialFixes.length} | Gaps: {iter.infoGaps.length}
                       </p>
-                      <div className="text-[10px] text-zinc-400 font-mono italic p-2 bg-zinc-950/60 border border-zinc-850 rounded-lg max-h-16 overflow-hidden text-ellipsis line-clamp-2 leading-relaxed">
+                      <div className="text-[10px] text-body font-mono italic p-2 bg-surface-soft/40 border border-hairline/60 rounded-md max-h-16 overflow-hidden text-ellipsis line-clamp-2 leading-relaxed font-sans">
                         {iter.draft}
                       </div>
                     </div>
@@ -335,12 +335,12 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
       )}
 
       {iterations.length === 0 && !loading && (
-        <div className="glass-panel p-12 rounded-2xl border border-zinc-800 bg-zinc-950/40 text-center max-w-md mx-auto shadow-lg animate-in fade-in duration-300">
-          <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-4 text-zinc-500">
+        <div className="p-12 rounded-lg border border-hairline bg-surface-card text-ink text-center max-w-md mx-auto shadow-sm animate-in fade-in duration-300">
+          <div className="w-12 h-12 rounded-lg bg-surface-soft border border-hairline flex items-center justify-center mx-auto mb-4 text-muted">
             <ShieldCheck size={26} />
           </div>
-          <h4 className="text-foreground font-bold mb-1 text-sm">Council Pending</h4>
-          <p className="text-xs text-zinc-500 leading-relaxed max-w-xs mx-auto">
+          <h4 className="text-ink font-serif font-bold mb-1 text-base">Council Pending</h4>
+          <p className="text-xs text-body leading-relaxed max-w-xs mx-auto">
             Click "Convene Council & Revise" to trigger the background evaluator loops. Shaan Puri, Morgan Housel, David Perell, Paul Graham, Ali Abdaal, and Alex Hormozi will score and edit your first draft.
           </p>
         </div>
