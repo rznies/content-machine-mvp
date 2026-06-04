@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Machine - One-Person Media Engine</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="AI-native content engine that mines ideas, conducts expert interviews, drafts posts, runs reviews, and repurposes content.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Root App Container -->
+  <div class="app-container" id="app">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text">
+          <h1>Content Machine</h1>
+          <span>One-Person Media Co.</span>
+        </div>
+      </div>
+      
+      <!-- Current State Card -->
+      <div class="active-status-card">
+        <label>Active Content Run</label>
+        <div id="active-idea-display" class="active-idea-empty">
+          No idea selected
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="#oracle" class="nav-link active" data-tab="oracle">
+              <span class="step-num">01</span> The Oracle <span class="badge ai">AI</span>
+            </a>
+          </li>
+          <li>
+            <a href="#vault" class="nav-link" data-tab="vault">
+              <span class="step-num">02</span> The Vault <span class="badge human">Human</span>
+            </a>
+          </li>
+          <li>
+            <a href="#researcher" class="nav-link" data-tab="researcher">
+              <span class="step-num">03</span> The Researcher <span class="badge ai">AI</span>
+            </a>
+          </li>
+          <li>
+            <a href="#interview" class="nav-link" data-tab="interview">
+              <span class="step-num">04</span> Interview Panel <span class="badge hybrid">AI+H</span>
+            </a>
+          </li>
+          <li>
+            <a href="#production" class="nav-link" data-tab="production">
+              <span class="step-num">05</span> Production <span class="badge ai">AI</span>
+            </a>
+          </li>
+          <li>
+            <a href="#refinement" class="nav-link" data-tab="refinement">
+              <span class="step-num">06</span> Refinement <span class="badge hybrid">AI+H</span>
+            </a>
+          </li>
+          <li>
+            <a href="#council" class="nav-link" data-tab="council">
+              <span class="step-num">07</span> Writer's Council <span class="badge ai">AI</span>
+            </a>
+          </li>
+          <li>
+            <a href="#repurpose" class="nav-link" data-tab="repurpose">
+              <span class="step-num">08</span> Repurposing <span class="badge ai">AI</span>
+            </a>
+          </li>
+          <li>
+            <a href="#revision" class="nav-link" data-tab="revision">
+              <span class="step-num">09</span> Final Revision <span class="badge human">Human</span>
+            </a>
+          </li>
+          <li>
+            <a href="#learning" class="nav-link" data-tab="learning">
+              <span class="step-num">10</span> Learning Loop <span class="badge ai">AI</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <span class="version">v1.0.0 (MVP)</span>
+        <a href="#settings" class="settings-link" data-tab="settings">⚙️ Settings</a>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="workspace-area">
+      <header class="workspace-header">
+        <h2 id="current-step-title">The Oracle</h2>
+        <p id="current-step-desc">Mines internal Slack, Notion, call transcripts, and external feeds for content spikes.</p>
+      </header>
+
+      <!-- Dynamic Console/Status Bar -->
+      <div class="terminal-log-container" id="terminal-container">
+        <div class="terminal-header">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">System Logs</span>
+        </div>
+        <div class="terminal-body" id="system-logs">
+          <div class="log-line system">[System] Content Machine initialized. Ready for feed mining.</div>
+        </div>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="tab-content-wrapper">
+        
+        <!-- STEP 1: THE ORACLE -->
+        <section id="tab-oracle" class="tab-panel active">
+          <div class="dashboard-grid">
+            <div class="card feed-card">
+              <h3>Sources & Feeds to Mine</h3>
+              <p class="subtitle">Mock data representing Slack channels, call logs, emails, and curations.</p>
+              
+              <div class="accordion">
+                <div class="accordion-item">
+                  <div class="accordion-header">💬 Slack (#general, #product-ideas)</div>
+                  <div class="accordion-content" id="feed-slack-preview">Loading...</div>
+                </div>
+                <div class="accordion-item">
+                  <div class="accordion-header">📧 Gmail (partner@tenex_labs.com)</div>
+                  <div class="accordion-content" id="feed-gmail-preview">Loading...</div>
+                </div>
+                <div class="accordion-item">
+                  <div class="accordion-header">🎙️ Call Transcripts (Founder Sync)</div>
+                  <div class="accordion-content" id="feed-transcripts-preview">Loading...</div>
+                </div>
+                <div class="accordion-item">
+                  <div class="accordion-header">🐦 X/Twitter Feed curation (@levie, etc)</div>
+                  <div class="accordion-content" id="feed-x-preview">Loading...</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card action-card flex-center">
+              <div class="action-graphics">🔍</div>
+              <h3>Scan & Mine for Spikes</h3>
+              <p>The Oracle runs an AI evaluation pass across all communications, seeking authentic, non-slop ideas rated &ge; 6/10.</p>
+              <button class="btn btn-primary btn-glow" id="btn-oracle-mine">
+                <span>Start Mining Pass</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 2: THE VAULT -->
+        <section id="tab-vault" class="tab-panel">
+          <div class="vault-container">
+            <div class="vault-header">
+              <h3>Qualified Content Ideas Vault</h3>
+              <button class="btn btn-secondary" id="btn-add-idea-modal">➕ Add Idea</button>
+            </div>
+            
+            <div class="vault-list" id="vault-ideas-list">
+              <!-- Dynamically populated -->
+              <p class="placeholder-text">Mining the feeds to populate your Vault...</p>
+            </div>
+            
+            <div id="add-idea-modal" class="modal">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h3>Add New Content Idea</h3>
+                  <span class="close-modal" id="close-modal">&times;</span>
+                </div>
+                <form id="add-idea-form">
+                  <div class="form-group">
+                    <label for="new-idea-title">Title</label>
+                    <input type="text" id="new-idea-title" required placeholder="e.g. Stop Paraphrasing in AI Writing">
+                  </div>
+                  <div class="form-group">
+                    <label for="new-idea-desc">Description / Context</label>
+                    <textarea id="new-idea-desc" rows="4" required placeholder="Describe the core argument, angles, and why it matters..."></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="new-idea-source">Source Reference</label>
+                    <input type="text" id="new-idea-source" placeholder="e.g. Email from Alice, Client sync">
+                  </div>
+                  <button type="submit" class="btn btn-primary">Save Idea to Vault</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 3: THE RESEARCHER -->
+        <section id="tab-researcher" class="tab-panel">
+          <div class="card">
+            <div class="card-header-actions">
+              <h3>Research & Sourcing Agent</h3>
+              <button class="btn btn-primary" id="btn-research-generate">Generate Sourced Report</button>
+            </div>
+            <p class="subtitle">Runs Gemini with Google Search grounding to analyze facts, controversies, and construct interview questions.</p>
+            
+            <div class="report-viewer-container">
+              <div class="report-header-banner" id="research-status-banner">
+                Report Status: Pending
+              </div>
+              <div class="markdown-preview" id="research-report-content">
+                <p class="placeholder-text">Select an idea from The Vault, then click "Generate Sourced Report" to run research.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 4: INTERVIEW PANEL -->
+        <section id="tab-interview" class="tab-panel">
+          <div class="interview-layout">
+            <div class="card panel-sidebar">
+              <h3>Interview Status</h3>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="interview-progress-fill" style="width: 0%"></div>
+                </div>
+                <span id="interview-progress-text">Questions: 0 / 6</span>
+              </div>
+              
+              <div class="interviewer-list" id="interviewer-list">
+                <div class="interviewer-card active" data-interviewer="Michael Barbaro">
+                  <span class="avatar">🎙️</span>
+                  <div>
+                    <h4>Michael Barbaro</h4>
+                    <small>The Daily (Host)</small>
+                  </div>
+                </div>
+                <div class="interviewer-card" data-interviewer="Joe Rogan">
+                  <span class="avatar">🥋</span>
+                  <div>
+                    <h4>Joe Rogan</h4>
+                    <small>Raw & Practical</small>
+                  </div>
+                </div>
+                <div class="interviewer-card" data-interviewer="Howard Stern">
+                  <span class="avatar">🕶️</span>
+                  <div>
+                    <h4>Howard Stern</h4>
+                    <small>Direct & Honest</small>
+                  </div>
+                </div>
+                <div class="interviewer-card" data-interviewer="Terry Gross">
+                  <span class="avatar">📻</span>
+                  <div>
+                    <h4>Terry Gross</h4>
+                    <small>Empathetic Reflections</small>
+                  </div>
+                </div>
+                <div class="interviewer-card" data-interviewer="Lex Fridman">
+                  <span class="avatar">🤖</span>
+                  <div>
+                    <h4>Lex Fridman</h4>
+                    <small>Philosophical Systems</small>
+                  </div>
+                </div>
+                <div class="interviewer-card" data-interviewer="Oprah Winfrey">
+                  <span class="avatar">👑</span>
+                  <div>
+                    <h4>Oprah Winfrey</h4>
+                    <small>Deep Aha! Insights</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card chat-card">
+              <div class="chat-header">
+                <div class="chat-agent-info">
+                  <span class="chat-agent-avatar" id="active-interviewer-avatar">🎙️</span>
+                  <div>
+                    <h3 id="active-interviewer-name">Michael Barbaro</h3>
+                    <span class="status-indicator online">active</span>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-interview-start">Start Interview</button>
+              </div>
+
+              <div class="chat-body" id="chat-history">
+                <div class="chat-message assistant">
+                  <div class="message-content">
+                    Ready to begin the interview. Click "Start Interview" to fetch the first question based on the research report.
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-footer">
+                <textarea id="interview-answer-input" rows="3" disabled placeholder="Type your detailed response (include stories, specifics, numbers)..."></textarea>
+                <button class="btn btn-primary" id="btn-interview-send" disabled>Send Response</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 5: PRODUCTION -->
+        <section id="tab-production" class="tab-panel">
+          <div class="card">
+            <div class="card-header-actions">
+              <h3>Production Markdown Builder</h3>
+              <button class="btn btn-primary" id="btn-production-compile">Compile Raw File</button>
+            </div>
+            <p class="subtitle">Translates the raw interview transcript into a structured reference file of exact stories, quotes, and insights.</p>
+            
+            <div class="report-viewer-container">
+              <div class="markdown-preview" id="production-content">
+                <p class="placeholder-text">Complete the interview panel, then click "Compile Raw File" to build the production file.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 6: REFINEMENT -->
+        <section id="tab-refinement" class="tab-panel">
+          <div class="dashboard-grid">
+            <div class="card inputs-config-card">
+              <h3>Refinement Blueprint</h3>
+              <p class="subtitle">Configure guidelines and select your format.</p>
+              
+              <div class="form-group">
+                <label for="refine-content-type">Target Content Type</label>
+                <select id="refine-content-type">
+                  <option value="LinkedIn Post">LinkedIn Post (Text format, texting a friend style)</option>
+                  <option value="X Thread">X / Twitter Thread (5-7 tweets)</option>
+                  <option value="Long Essay">Long Form Essay (Detailed, subheadings)</option>
+                </select>
+              </div>
+
+              <div class="style-preview-container">
+                <label>Active Style Guide Instructions:</label>
+                <div class="style-guide-box" id="style-guide-box">Loading style guide...</div>
+              </div>
+
+              <div class="lessons-preview-container">
+                <label>Active Lessons & Corrective Memory:</label>
+                <div class="lessons-box" id="lessons-box">No lessons extracted yet. Future loops will populate this.</div>
+              </div>
+
+              <button class="btn btn-primary btn-glow w-100" id="btn-refine-draft">
+                Draft First Version
+              </button>
+            </div>
+
+            <div class="card output-draft-card">
+              <h3>Refinement Draft Viewer</h3>
+              <div class="draft-viewer" id="refinement-draft-content">
+                <p class="placeholder-text">Configure details and click "Draft First Version" to generate.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 7: WRITER'S COUNCIL -->
+        <section id="tab-council" class="tab-panel">
+          <div class="council-layout">
+            <div class="card feedback-panel">
+              <div class="card-header-actions">
+                <h3>Writer's Council Scoring</h3>
+                <button class="btn btn-primary" id="btn-council-review">Convene Council & Revise</button>
+              </div>
+              <p class="subtitle">Runs 6 world-class expert reviewers, scores the draft, and triggers the revision loop until score &ge; 9/10.</p>
+              
+              <div class="council-radar-grid" id="council-scores-grid">
+                <!-- Dynamically populated score blocks -->
+                <p class="placeholder-text text-center">Run the Council review to see scores.</p>
+              </div>
+              
+              <div class="fixes-split-container">
+                <div class="fixes-column">
+                  <h4>🔧 Editorial Fixes (Auto-Revised)</h4>
+                  <ul id="council-fixes-editorial">
+                    <li>Pending review...</li>
+                  </ul>
+                </div>
+                <div class="fixes-column">
+                  <h4>💡 Information Gaps (Creator Review)</h4>
+                  <ul id="council-fixes-gaps">
+                    <li>Pending review...</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="card draft-history-panel">
+              <h3>Council Revision Loop History</h3>
+              <div class="revision-history-list" id="revision-history-list">
+                <!-- Shows scores and draft changes across iterations -->
+                <p class="placeholder-text">Revision loop logs will print here.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 8: REPURPOSING -->
+        <section id="tab-repurpose" class="tab-panel">
+          <div class="card">
+            <div class="card-header-actions">
+              <h3>Repurposing Engine</h3>
+              <button class="btn btn-primary" id="btn-repurpose-generate">Generate 5 Derivatives</button>
+            </div>
+            <p class="subtitle">Takes the final approved anchor post and creates platform-native formats.</p>
+            
+            <div class="repurpose-tabs" id="repurpose-tabs">
+              <!-- Dynamically populated buttons -->
+            </div>
+            <div class="repurpose-viewer-box" id="repurpose-content-box">
+              <p class="placeholder-text">Run the Repurposing Engine to create native derivatives.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 9: FINAL REVISION -->
+        <section id="tab-revision" class="tab-panel">
+          <div class="card flex-grow-container">
+            <h3>Final Revision & Sign-off</h3>
+            <p class="subtitle">Review the draft with a fine-tooth comb. Tweak the text manually to match your exact liking before publishing.</p>
+            
+            <div class="editor-area">
+              <textarea id="final-editor-textarea" rows="20" placeholder="Your final draft will load here... Edit it directly."></textarea>
+            </div>
+            
+            <div class="editor-actions">
+              <button class="btn btn-secondary" id="btn-load-current-draft">Load Current Draft</button>
+              <button class="btn btn-primary btn-glow" id="btn-approve-signoff">Approve & Save (Sign-Off)</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 10: LEARNING LOOP -->
+        <section id="tab-learning" class="tab-panel">
+          <div class="dashboard-grid">
+            <div class="card diff-comparison-card">
+              <h3>Difference Comparison</h3>
+              <p class="subtitle">Comparison of First AI Draft vs Final Approved Version.</p>
+              <div class="diff-viewer" id="diff-viewer-content">
+                <p class="placeholder-text">Sign off on content in the Final Revision tab to trigger the comparison.</p>
+              </div>
+            </div>
+
+            <div class="card lessons-learned-card">
+              <h3>Extracted Writing Lessons</h3>
+              <p class="subtitle">Learnings extracted from your edits. These override style rules in future runs.</p>
+              <div class="markdown-preview" id="lessons-learned-content">
+                <p class="placeholder-text">Pending final sign-off.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- SETTINGS TAB -->
+        <section id="tab-settings" class="tab-panel">
+          <div class="card max-width-md">
+            <h3>Configuration & API Settings</h3>
+            <p class="subtitle">Manage API keys, content styles, and mock inputs.</p>
+            
+            <div class="form-group">
+              <label>API Connection Status</label>
+              <div class="status-banner info" id="api-status-text">
+                Checking key...
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Content Machine Style Guide</label>
+              <textarea id="style-guide-editor" rows="10" placeholder="Load style guide..."></textarea>
+            </div>
+            
+            <button class="btn btn-primary" id="btn-save-settings">Save Guide & Settings</button>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+{
+  "voice": {
+    "core": "Write like you're texting a friend",
+    "tone": ["conversational", "direct", "warm", "slightly irreverent"],
+    "pov": "second-person (you) and first-person (I/we)",
+    "sentenceLength": { "target": 12, "max": 25 },
+    "paragraphLength": { "maxLines": 3 },
+    "readingLevel": { "target": "Grade 7", "max": "Grade 9" }
+  },
+  "rules": [
+    "Use contractions (it's, don't, won't, can't)",
+    "Start with a hook — never a greeting or preamble",
+    "Replace every vague quantifier with an actual number",
+    "Use active voice. Kill passive constructions.",
+    "One idea per paragraph. Let ideas breathe.",
+    "End with a question, CTA, or surprising twist — never 'In conclusion'"
+  ],
+  "preferredPhrases": [
+    "here's the thing", "look", "honestly", "the real question is",
+    "let me explain", "nobody talks about this", "I was wrong about"
+  ],
+  "platformAdaptations": {
+    "linkedin": {
+      "hookPosition": "first 2 lines (pre-fold)",
+      "paragraphStyle": "single-sentence paragraphs",
+      "ending": "interactive question",
+      "maxLength": 3000
+    },
+    "x_thread": {
+      "hookTweet": "Most important insight first — standalone value",
+      "numbering": "1/ 2/ 3/ format",
+      "tweetLength": 280,
+      "threadLength": "5-7 tweets"
+    },
+    "x_short": {
+      "maxLength": 280,
+      "style": "punchy, controversial, or surprising"
+    },
+    "newsletter": {
+      "opening": "conversational greeting, story-first",
+      "ending": "warm CTA, personal voice",
+      "tone": "intimate, like writing to one person"
+    },
+    "video_script": {
+      "hookWindow": "first 3 seconds",
+      "patternInterrupt": "every 15-20 seconds",
+      "duration": "60-90 seconds"
+    }
+  },
+  "voiceExamples": [
+    {
+      "bad": "We observed significant growth in our user acquisition metrics during Q3, which can be attributed to our innovative marketing strategies.",
+      "good": "We went from 200 to 1,400 users in 90 days. Here's exactly what we did."
+    },
+    {
+      "bad": "It's worth noting that the landscape of AI-powered content creation is rapidly evolving, and businesses should leverage these tools.",
+      "good": "Most AI content is garbage. But if you feed it your actual stories instead of letting it make stuff up, the output is shockingly good."
+    },
+    {
+      "bad": "In conclusion, the implementation of our content pipeline has yielded substantial results for our organization.",
+      "good": "That single LinkedIn post drove 80% of our pipeline. One post. No ads. Just a raw story with real numbers."
+    }
+  ]
+}

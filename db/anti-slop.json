@@ -1,0 +1,27 @@
+{
+  "bannedWords": [
+    "delve", "tapestry", "moreover", "furthermore", "beacon", 
+    "testament", "revolutionizing", "landscape", "paradigm", 
+    "leverage", "synergy", "game-changer", "cutting-edge",
+    "in conclusion", "it's worth noting", "in today's world",
+    "at the end of the day", "deep dive", "unpack", "holistic",
+    "seamlessly", "robust", "innovative", "transformative"
+  ],
+  "bannedPatterns": [
+    "In the ever-evolving*",
+    "Let's dive into*",
+    "In today's fast-paced*",
+    "It goes without saying*",
+    "As we navigate*"
+  ],
+  "replacements": {
+    "utilize": "use",
+    "commence": "start",
+    "terminate": "end",
+    "facilitate": "help",
+    "implement": "build",
+    "significant": "[replace with actual number]",
+    "numerous": "[replace with actual count]",
+    "substantial": "[replace with actual amount]"
+  }
+}

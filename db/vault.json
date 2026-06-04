@@ -1,0 +1,112 @@
+[
+  {
+    "id": "idea_1",
+    "title": "Stop Paraphrasing: Why Raw Transcripts Are Sacred in AI Writing",
+    "description": "Explaining why standard AI writing sounds like slop because it throws away the user's raw words, and why keeping the exact transcript/quotes is the key to authentic content.",
+    "source": "Slack channel #general, Bob's post",
+    "score": 8.5,
+    "rationale": "Strong, opinionated angle that goes against the standard practice of letting ChatGPT write from scratch. Highly relevant to founders and content creators.",
+    "status": "qualified",
+    "createdAt": "2026-06-03T11:00:00Z"
+  },
+  {
+    "id": "idea_2",
+    "title": "Vanilla CSS is My Secret Superpower for MVPs",
+    "description": "Why Tailwind can slow down early-stage iterations, and how modern CSS variables make vanilla CSS the fastest way to build mockups.",
+    "source": "Slack channel #product-ideas, Alice's post",
+    "score": 7,
+    "rationale": "Appeals to developers tired of utility class bloat. Good contrarian developer topic.",
+    "status": "qualified",
+    "createdAt": "2026-06-03T15:00:00Z"
+  },
+  {
+    "id": "idea_oracle_1780555533777_977",
+    "title": "Stop Letting AI Paraphrase Your Voice: The 'Text Your Friend' Rule for Authentic Content",
+    "description": "Many struggle to maintain an authentic voice when using AI for content. The key is to treat AI as a compiler, not a writer, by seeding it with raw, human text written as if texting a friend. This prevents generic output and keeps content warm and personal.",
+    "source": "Slack Channel #general (ID: slack_1)",
+    "score": 9,
+    "rationale": "Offers a practical, contrarian solution to a common AI content problem. The 'texting a friend' rule is a memorable and actionable tip for achieving genuine tone, directly addressing the core issue of losing human voice in AI-assisted writing.",
+    "status": "qualified",
+    "createdAt": "2026-06-04T06:45:33.777Z"
+  },
+  {
+    "id": "idea_oracle_1780555533777_858",
+    "title": "Why Vanilla CSS Beats Tailwind for Your Next MVP (and Tiny Marketing Pages)",
+    "description": "A contrarian take arguing that for small projects, MVPs, and simple marketing pages, vanilla CSS with modern CSS variables is superior to Tailwind. It offers faster development, easier modification, and smaller bundle sizes, while reserving Tailwind for larger, component-driven team projects.",
+    "source": "Slack Channel #product-ideas (ID: slack_2)",
+    "score": 8,
+    "rationale": "Challenges a popular framework (Tailwind) with specific, practical use cases where an alternative (vanilla CSS with variables) is genuinely better. It's an authentic opinion from a practitioner, offering valuable guidance on tooling choices for specific project scopes.",
+    "status": "qualified",
+    "createdAt": "2026-06-04T06:45:33.777Z"
+  },
+  {
+    "id": "idea_oracle_1780555533777_721",
+    "title": "The 80% Pipeline Secret: Why Raw Engineer Stories Outperform Polished Corporate Content",
+    "description": "Based on a real-world example where 80% of inbound pipeline came from a single, raw LinkedIn essay detailing struggles and revenue, not corporate copy. The idea emphasizes the power of authentic, behind-the-scenes narratives, especially from engineering teams, over highly polished marketing material.",
+    "source": "Gmail (ID: email_1, From: partner@tenex_labs.com)",
+    "score": 9.5,
+    "rationale": "Extremely high authenticity due to specific, measurable business results ('80% of pipeline') and a bold narrative ('fired our marketing agency'). It's highly contrarian to traditional marketing approaches and offers clear, actionable advice to leverage internal expertise for truly impactful content.",
+    "status": "qualified",
+    "createdAt": "2026-06-04T06:45:33.777Z"
+  },
+  {
+    "id": "idea_oracle_1780555533777_611",
+    "title": "The Centaur Content Machine: How to Interview Your Builders & Use AI as a Compiler, Not a Writer",
+    "description": "Proposes a 'centaur' content strategy where humans provide the 'first mile' (raw stories from builders/experts via short interviews) and the 'final mile' (review/signoff), while AI handles the 'middle mile' (compilation, formatting, refinement). This combats generic blogs by leveraging internal expertise and focusing AI on augmentation rather than creation from scratch.",
+    "source": "Transcript: Founder Sync - Content Strategy (ID: transcript_1) and X Feed (ID: tweet_1, Author: @levie)",
+    "score": 9,
+    "rationale": "This idea is highly authentic, coming from a CEO's direct observation of a common problem (generic corporate blogs) and offering a structured, actionable solution. It aligns with the 'centaur' concept of human-AI collaboration, providing a clear framework for producing unique, high-quality content at scale. It consolidates similar ideas from multiple sources, strengthening its validity.",
+    "status": "qualified",
+    "createdAt": "2026-06-04T06:45:33.777Z"
+  },
+  {
+    "id": "idea_oracle_1780558251078_28",
+    "title": "The 'Texting a Friend' Rule: How to Keep Your Voice in AI-Generated Content",
+    "description": "Explores the common pitfall of AI models paraphrasing away human voice, and offers a practical solution: seeding AI with raw, authentic transcripts and using the mental model of 'writing like you are texting a friend' for initial drafts to ensure a human, warm, and authentic output.",
+    "source": "Slack Channel #general (Alice)",
+    "score": 9,
+    "rationale": "Authentic personal experience with a highly actionable and contrarian tip for working with AI. Addresses a pervasive problem with a simple, effective solution.",
+    "status": "qualified",
+    "createdAt": "2026-06-04T07:30:51.078Z"
+  },
+  {
+    "id": "idea_oracle_1780558251078_20",
+    "title": "Why Vanilla CSS with Variables Beats Tailwind for Small Marketing Sites",
+    "description": "Argues that for small projects like MVP marketing pages, vanilla CSS combined with modern CSS variables offers superior speed, modifiability, and smaller bundle size compared to using opinionated frameworks like Tailwind, which are better suited for large-team component systems.",
+    "source": "Slack Channel #product-ideas (Bob)",
+    "score": 8,
+    "rationale": "A strong, opinionated stance that challenges a popular development trend (Tailwind for everything). Provides clear reasons and context for when to choose an alternative, making it valuable for developers and product managers.",
+    "status": "qualified",
+    "createdAt": "2026-06-04T07:30:51.078Z"
+  },
+  {
+    "id": "idea_oracle_1780558251078_443",
+    "title": "80% of Our Pipeline Came From This: Why Raw, Behind-the-Scenes Stories Outperform Polished Corporate Copy",
+    "description": "Highlights how a single, unpolished LinkedIn essay detailing real struggles and specific revenue numbers generated 80% of inbound pipeline, advocating for authentic, behind-the-scenes content shared by internal builders over generic, polished corporate messaging to drive business results.",
+    "source": "Gmail from partner@tenex_labs.com",
+    "score": 9.5,
+    "rationale": "Extremely high impact content idea backed by a specific, compelling data point ('80% of our inbound pipeline'). It's contrarian to traditional marketing and offers clear, actionable advice for genuine audience engagement.",
+    "status": "qualified",
+    "createdAt": "2026-06-04T07:30:51.078Z"
+  },
+  {
+    "id": "idea_oracle_1780558251078_597",
+    "title": "The 'First Mile, Middle Mile, Last Mile' Content Machine: How We're Using AI as a Compiler, Not a Writer",
+    "description": "Proposes a strategic content creation model: 'First Mile' (humans provide context and raw stories from builders), 'Middle Mile' (AI acts as a compiler for automation), and 'Last Mile' (humans provide final review and signoff). This system aims to create authentic content, moving beyond SEO keyword stuffing and freelance writers.",
+    "source": "Transcript: Founder Sync - Content Strategy",
+    "score": 10,
+    "rationale": "A visionary and highly strategic approach to content creation that redefines the human-AI partnership. It directly addresses a core industry problem (inauthentic corporate content) with a structured, innovative solution, making it world-class.",
+    "status": "qualified",
+    "createdAt": "2026-06-04T07:30:51.078Z"
+  },
+  {
+    "id": "idea_oracle_1780558251078_38",
+    "title": "The Centaur Content System: Why AI Needs Your Unique Story to Write Great Articles",
+    "description": "Explores the concept of 'centaur' systems in software and content creation, where humans and AI are tightly integrated. It emphasizes that AI cannot produce great articles without unique human stories and context as input, but excels at formatting, refining, and repurposing once that raw human input is provided.",
+    "source": "X Feed by @levie",
+    "score": 9,
+    "rationale": "A high-level validation and articulation of the human-AI synergy in content. It's thought-provoking, challenges the 'AI does everything' narrative, and aligns perfectly with the other high-scoring ideas on authenticity and human input.",
+    "status": "qualified",
+    "createdAt": "2026-06-04T07:30:51.078Z"
+  }
+]

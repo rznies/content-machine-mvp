@@ -1,0 +1,43 @@
+{
+  "slack": [
+    {
+      "id": "slack_1",
+      "channel": "#general",
+      "author": "Alice",
+      "timestamp": "2026-06-03T10:14:00Z",
+      "text": "Honestly, the biggest mistake people make with AI-generated content is letting the model paraphrase away their actual voice. When I write a draft, it sounds like an academic essay. I started using a rule: 'Write like you are texting a friend'. The output immediately felt human, warm, and authentic. AI content is only as good as the raw transcript you seed it with."
+    },
+    {
+      "id": "slack_2",
+      "channel": "#product-ideas",
+      "author": "Bob",
+      "timestamp": "2026-06-03T14:30:00Z",
+      "text": "We need to stop using standard Tailwind classes for every simple marketing page we build. For small projects, vanilla CSS with modern CSS variables is 10x faster to write, easier to modify, and keeps our bundle size tiny. Tailwind is great for components in large teams, but for MVP design, custom CSS rules."
+    }
+  ],
+  "gmail": [
+    {
+      "id": "email_1",
+      "from": "partner@tenex_labs.com",
+      "subject": "Our pipeline issues & how content drives it",
+      "timestamp": "2026-06-02T09:00:00Z",
+      "body": "Hey team, we noticed that 80% of our inbound pipeline for Tenex Labs this quarter came from that single LinkedIn essay on 'Why we fired our marketing agency and built an AI dev shop'. People don't want polished corporate copy anymore. They want raw, behind-the-scenes stories with real revenue numbers and specific struggles. Let's make sure all our key engineering team members start sharing their daily learnings."
+    }
+  ],
+  "transcripts": [
+    {
+      "id": "transcript_1",
+      "title": "Founder Sync - Content Strategy",
+      "timestamp": "2026-06-01T16:00:00Z",
+      "content": "CEO: 'The problem with most corporate blogs is that they are written by freelance writers who don't actually build the product. It's just SEO keyword stuffing. I want to build a content machine where we interview our builders for 15 minutes, extract their raw stories, and use AI as a compiler, not a writer. The human has to provide the first mile (context and raw stories) and the final mile (review and signoff). The middle mile is pure automation.'"
+    }
+  ],
+  "x_feed": [
+    {
+      "id": "tweet_1",
+      "author": "@levie",
+      "timestamp": "2026-06-03T18:22:00Z",
+      "text": "The next wave of software isn't agents doing everything. It's 'centaur' systems where humans are tightly integrated in loops. For example, AI can't write a great article without a human sharing a specific unique story, but once the story is told, the AI can format, refine, and repurpose it flawlessly."
+    }
+  ]
+}

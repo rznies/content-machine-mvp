@@ -1,0 +1,34 @@
+{
+  "global": [
+    {
+      "lesson": "Remove greetings like 'Hey guys'. Start directly with the hook.",
+      "category": "hooks",
+      "learnedAt": "2026-06-04",
+      "contentType": "all",
+      "confidence": 0.9
+    },
+    {
+      "lesson": "Prefer starting directly with a question or a surprising statistic.",
+      "category": "hooks",
+      "learnedAt": "2026-06-04",
+      "contentType": "all",
+      "confidence": 0.8
+    }
+  ],
+  "byContentType": {
+    "linkedin": [
+      {
+        "lesson": "Always split paragraphs into single sentence statements to increase spacing and readability.",
+        "category": "formatting",
+        "learnedAt": "2026-06-04",
+        "contentType": "linkedin",
+        "confidence": 0.7
+      }
+    ]
+  },
+  "metrics": {
+    "averageScoreHistory": [8.2, 8.5],
+    "lessonCount": 3,
+    "lastUpdated": "2026-06-04"
+  }
+}

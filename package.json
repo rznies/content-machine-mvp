@@ -1,0 +1,27 @@
+{
+  "name": "content-machine-mvp",
+  "version": "1.0.0",
+  "description": "Content Machine MVP from Tweet",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev:server": "node server.js",
+    "dev:client": "npm run --prefix frontend dev",
+    "build:client": "npm run --prefix frontend build",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "postinstall": "npm install --prefix frontend"
+  },
+  "dependencies": {
+    "@google/genai": "*",
+    "cors": "*",
+    "dotenv": "*",
+    "express": "*",
+    "imapflow": "^1.3.5",
+    "mailparser": "^3.9.9",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
