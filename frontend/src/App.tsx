@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useApp } from './context/AppContext';
 import { OracleTab } from './components/OracleTab';
 import { VaultTab } from './components/VaultTab';
@@ -22,7 +22,8 @@ import {
   Lock, 
   Check, 
   User,
-  Dot
+  Dot,
+  MagnifyingGlass
 } from '@phosphor-icons/react';
 import { clsx } from "clsx";
 
@@ -74,10 +75,170 @@ function App() {
     unreadLogsCount
   } = useApp();
 
+  // Keyboard Shortcuts & Command Palette
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  interface CommandItem {
+    id: string;
+    title: string;
+    shortcut?: string;
+    action: () => void;
+    disabled?: boolean;
+  }
+
   const isStepLocked = (stepKey: string) => {
     if (stepKey === 'oracle' || stepKey === 'vault' || stepKey === 'settings' || stepKey === 'home') return false;
     return !activeIdea;
   };
+
+  const filteredCommands = useMemo<CommandItem[]>(() => {
+    const commands: CommandItem[] = [
+      {
+        id: 'toggle-activity',
+        title: 'Toggle Activity Panel',
+        shortcut: 'Cmd+.',
+        action: () => {
+          setIsActivityOpen(!isActivityOpen);
+          setIsCommandPaletteOpen(false);
+        }
+      },
+      {
+        id: 'theme-light',
+        title: 'Switch to Light Mode',
+        action: () => {
+          document.documentElement.classList.add('light');
+          localStorage.setItem('theme', 'light');
+          setIsCommandPaletteOpen(false);
+        }
+      },
+      {
+        id: 'theme-dark',
+        title: 'Switch to Dark Mode',
+        action: () => {
+          document.documentElement.classList.remove('light');
+          localStorage.setItem('theme', 'dark');
+          setIsCommandPaletteOpen(false);
+        }
+      },
+      {
+        id: 'theme-auto',
+        title: 'Switch to System Auto Theme',
+        action: () => {
+          localStorage.removeItem('theme');
+          const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (systemDark) {
+            document.documentElement.classList.remove('light');
+          } else {
+            document.documentElement.classList.add('light');
+          }
+          setIsCommandPaletteOpen(false);
+        }
+      },
+      {
+        id: 'start-new',
+        title: 'Start a New Content Idea',
+        action: () => {
+          setActiveIdea(null);
+          setActiveTab('oracle');
+          setIsCommandPaletteOpen(false);
+        }
+      },
+      ...Object.entries(STEP_DETAILS).map(([key, details]) => {
+        const locked = isStepLocked(key);
+        return {
+          id: `go-${key}`,
+          title: `Go to Step: ${details.title}`,
+          shortcut: key === 'home' ? 'H' : key === 'settings' ? 'S' : String(details.index % 10),
+          disabled: locked,
+          action: () => {
+            setActiveTab(key);
+            setIsCommandPaletteOpen(false);
+          }
+        };
+      })
+    ];
+
+    if (!searchQuery.trim()) return commands;
+    const query = searchQuery.toLowerCase();
+    return commands.filter(cmd => cmd.title.toLowerCase().includes(query));
+  }, [searchQuery, activeIdea, isActivityOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isTyping = 
+        document.activeElement?.tagName === 'INPUT' || 
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        document.activeElement?.getAttribute('contenteditable') === 'true';
+
+      // Cmd+K or Ctrl+K for Command Palette
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => {
+          if (!prev) {
+            setSearchQuery('');
+            setSelectedIndex(0);
+          }
+          return !prev;
+        });
+        return;
+      }
+
+      if (isCommandPaletteOpen) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          setIsCommandPaletteOpen(false);
+          return;
+        }
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setSelectedIndex(prev => (prev + 1) % filteredCommands.length);
+          return;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setSelectedIndex(prev => (prev - 1 + filteredCommands.length) % filteredCommands.length);
+          return;
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const targetCmd = filteredCommands[selectedIndex];
+          if (targetCmd && !targetCmd.disabled) {
+            targetCmd.action();
+          }
+          return;
+        }
+        return;
+      }
+
+      if (!isTyping) {
+        const stepKeys = ['oracle', 'vault', 'researcher', 'interview', 'production', 'refinement', 'council', 'repurpose', 'revision', 'learning'];
+        if (e.key >= '1' && e.key <= '9') {
+          const idx = parseInt(e.key) - 1;
+          const target = stepKeys[idx];
+          if (target && !isStepLocked(target)) {
+            e.preventDefault();
+            setActiveTab(target);
+          }
+        } else if (e.key === '0') {
+          const target = stepKeys[9];
+          if (target && !isStepLocked(target)) {
+            e.preventDefault();
+            setActiveTab(target);
+          }
+        }
+
+        if ((e.metaKey || e.ctrlKey) && e.key === '.') {
+          e.preventDefault();
+          setIsActivityOpen(!isActivityOpen);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCommandPaletteOpen, selectedIndex, filteredCommands, activeIdea, isActivityOpen]);
 
   const getStepStatusIcon = (stepKey: string, isSelected: boolean) => {
     const isLocked = isStepLocked(stepKey);
@@ -292,6 +453,63 @@ function App() {
         {/* Activity Panel Slide-over */}
         <ActivityPanel />
       </main>
+
+      {/* Command Palette Overlay */}
+      {isCommandPaletteOpen && (
+        <div className="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[15dvh] px-4 animate-in fade-in duration-150">
+          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[400px] animate-in zoom-in-95 duration-150">
+            <div className="p-4 border-b border-zinc-800 flex items-center gap-3">
+              <MagnifyingGlass size={16} className="text-zinc-500" />
+              <input
+                autoFocus
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSelectedIndex(0);
+                }}
+                placeholder="Search actions and steps... (Esc to close)"
+                className="flex-1 bg-transparent border-0 outline-none text-xs text-foreground placeholder-zinc-500"
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto custom-scroll p-2">
+              {filteredCommands.length > 0 ? (
+                filteredCommands.map((cmd, idx) => (
+                  <button
+                    key={cmd.id}
+                    disabled={cmd.disabled}
+                    onClick={cmd.action}
+                    onMouseEnter={() => setSelectedIndex(idx)}
+                    className={clsx(
+                      "w-full text-left py-2.5 px-3.5 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer",
+                      idx === selectedIndex ? "bg-primary text-white" : "text-zinc-400 hover:text-foreground",
+                      cmd.disabled && "opacity-35 cursor-not-allowed"
+                    )}
+                  >
+                    <span>{cmd.title}</span>
+                    {cmd.shortcut && (
+                      <kbd className={clsx(
+                        "font-mono text-[9px] px-1.5 py-0.5 rounded border leading-none font-bold uppercase",
+                        idx === selectedIndex ? "border-white/20 bg-white/10 text-white" : "border-zinc-800 bg-zinc-950 text-zinc-500"
+                      )}>
+                        {cmd.shortcut}
+                      </kbd>
+                    )}
+                  </button>
+                ))
+              ) : (
+                <p className="text-xs text-zinc-500 italic text-center py-6">No commands found.</p>
+              )}
+            </div>
+            
+            <div className="p-3 bg-zinc-950/40 border-t border-zinc-800 text-[9px] text-zinc-500 font-medium flex justify-between items-center px-4">
+              <span>Use &uarr;&darr; to navigate, Enter to select</span>
+              <span>Esc to exit</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
