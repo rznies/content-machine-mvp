@@ -1,20 +1,19 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenAI } from "@google/genai";
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
 import Parser from "rss-parser";
+import { storage } from "./storage/index.js";
 
 // Load environment variables
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_DIR = path.join(__dirname, "db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,7 +23,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Ensure database directory exists
-await fs.mkdir(DB_DIR, { recursive: true });
+await storage.ensureInitialized();
 
 // Initialize Gemini Client
 const apiKey = process.env.GEMINI_API_KEY;
@@ -33,50 +32,21 @@ if (!apiKey) {
 }
 const ai = new GoogleGenAI({ apiKey });
 
-// Helper to read JSON DB
-async function readJson(filename, defaultValue = []) {
-  try {
-    const data = await fs.readFile(path.join(DB_DIR, filename), "utf-8");
-    return JSON.parse(data);
-  } catch (error) {
-    return defaultValue;
-  }
-}
-
-// Helper to write JSON DB
-async function writeJson(filename, data) {
-  await fs.writeFile(path.join(DB_DIR, filename), JSON.stringify(data, null, 2), "utf-8");
-}
-
-// Helper to write Markdown file
-async function writeMarkdown(filename, content) {
-  await fs.writeFile(path.join(DB_DIR, filename), content, "utf-8");
-}
-
-// Helper to read Markdown file
-async function readMarkdown(filename, defaultValue = "") {
-  try {
-    return await fs.readFile(path.join(DB_DIR, filename), "utf-8");
-  } catch (error) {
-    return defaultValue;
-  }
-}
-
 // Model Configurations
 const FAST_MODEL = "gemini-2.5-flash";
 const PRO_MODEL = "gemini-2.5-pro";
 
 // Loaders for new structured database configuration files
 async function loadAntiSlop() {
-  return await readJson("anti-slop.json", { bannedWords: [], bannedPatterns: [], replacements: {} });
+  return await storage.getAntiSlop();
 }
 
 async function loadStyleSystem() {
-  return await readJson("style-system.json", { voice: {}, rules: [], preferredPhrases: [], platformAdaptations: {}, voiceExamples: [] });
+  return await storage.getStyleSystem();
 }
 
 async function loadGoldenExamples() {
-  return await readJson("golden-examples.json", []);
+  return await storage.getGoldenExamples();
 }
 
 // Local draft slop checking and metric extraction
@@ -261,7 +231,7 @@ async function fetchRealSlack() {
   const channel = process.env.SLACK_CHANNEL_ID;
   if (!token || !channel) {
     console.log("Slack config missing (SLACK_BOT_TOKEN/SLACK_CHANNEL_ID). Using mock Slack data.");
-    const mock = await readJson("mock-inputs.json", {});
+    const mock = await storage.getMockInputs();
     return mock.slack || [];
   }
 
@@ -280,12 +250,12 @@ async function fetchRealSlack() {
       }));
     } else {
       console.warn("Slack API response failed, using mock:", data.error);
-      const mock = await readJson("mock-inputs.json", {});
+      const mock = await storage.getMockInputs();
       return mock.slack || [];
     }
   } catch (err) {
     console.error("Slack fetch error, falling back to mock:", err.message);
-    const mock = await readJson("mock-inputs.json", {});
+    const mock = await storage.getMockInputs();
     return mock.slack || [];
   }
 }
@@ -296,7 +266,7 @@ async function fetchRealGmail() {
   const pass = process.env.GMAIL_APP_PASSWORD;
   if (!user || !pass) {
     console.log("Gmail IMAP config missing (GMAIL_USER/GMAIL_APP_PASSWORD). Using mock Gmail data.");
-    const mock = await readJson("mock-inputs.json", {});
+    const mock = await storage.getMockInputs();
     return mock.gmail || [];
   }
 
@@ -336,7 +306,7 @@ async function fetchRealGmail() {
     return emails.reverse();
   } catch (err) {
     console.error("Gmail IMAP fetch error, falling back to mock:", err.message);
-    const mock = await readJson("mock-inputs.json", {});
+    const mock = await storage.getMockInputs();
     return mock.gmail || [];
   }
 }
@@ -347,7 +317,7 @@ async function fetchRealNotion() {
   const pageIdsStr = process.env.NOTION_PAGE_IDS;
   if (!apiKey || !pageIdsStr) {
     console.log("Notion page config missing (NOTION_API_KEY/NOTION_PAGE_IDS). Using mock transcripts/Notion data.");
-    const mock = await readJson("mock-inputs.json", {});
+    const mock = await storage.getMockInputs();
     return mock.transcripts || [];
   }
 
@@ -387,12 +357,12 @@ async function fetchRealNotion() {
     if (notionNotes.length > 0) {
       return notionNotes;
     } else {
-      const mock = await readJson("mock-inputs.json", {});
+      const mock = await storage.getMockInputs();
       return mock.transcripts || [];
     }
   } catch (err) {
     console.error("Notion fetch error, falling back to mock:", err.message);
-    const mock = await readJson("mock-inputs.json", {});
+    const mock = await storage.getMockInputs();
     return mock.transcripts || [];
   }
 }
@@ -402,7 +372,7 @@ async function fetchRealRSS() {
   const feedUrlsStr = process.env.FEED_URLS;
   if (!feedUrlsStr) {
     console.log("FEED_URLS config missing. Using mock X feed.");
-    const mock = await readJson("mock-inputs.json", {});
+    const mock = await storage.getMockInputs();
     return mock.x_feed || [];
   }
 
@@ -427,12 +397,12 @@ async function fetchRealRSS() {
     if (feedItems.length > 0) {
       return feedItems;
     } else {
-      const mock = await readJson("mock-inputs.json", {});
+      const mock = await storage.getMockInputs();
       return mock.x_feed || [];
     }
   } catch (err) {
     console.error("RSS fetch error, falling back to mock:", err.message);
-    const mock = await readJson("mock-inputs.json", {});
+    const mock = await storage.getMockInputs();
     return mock.x_feed || [];
   }
 }
@@ -504,7 +474,7 @@ app.post("/api/oracle/mine", async (req, res) => {
     const gmail = await fetchRealGmail();
     const transcripts = await fetchRealNotion();
     let x_feed = await fetchRealRSS();
-    const vault = await readJson("vault.json", []);
+    const vault = await storage.getVault();
 
     const fcApiKey = process.env.FIRECRAWL_API_KEY;
     if (fcApiKey && x_feed.length > 0) {
@@ -653,7 +623,7 @@ Do not wrap in markdown tags. Return raw JSON.
       }
     }
 
-    await writeJson("vault.json", updatedVault);
+    await storage.saveVault(updatedVault);
 
     res.json({
       success: true,
@@ -670,14 +640,14 @@ Do not wrap in markdown tags. Return raw JSON.
 // 2. Vault Endpoints (/api/vault)
 // ==========================================
 app.get("/api/vault", async (req, res) => {
-  const vault = await readJson("vault.json", []);
+  const vault = await storage.getVault();
   res.json({ success: true, vault });
 });
 
 app.post("/api/vault/add", async (req, res) => {
   try {
     const { title, description, source } = req.body;
-    const vault = await readJson("vault.json", []);
+    const vault = await storage.getVault();
     const newIdea = {
       id: `idea_manual_${Date.now()}`,
       title,
@@ -689,7 +659,7 @@ app.post("/api/vault/add", async (req, res) => {
       createdAt: new Date().toISOString()
     };
     vault.push(newIdea);
-    await writeJson("vault.json", vault);
+    await storage.saveVault(vault);
     res.json({ success: true, vault });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -699,12 +669,12 @@ app.post("/api/vault/add", async (req, res) => {
 app.post("/api/vault/select", async (req, res) => {
   try {
     const { ideaId } = req.body;
-    const vault = await readJson("vault.json", []);
+    const vault = await storage.getVault();
     const selected = vault.find(i => i.id === ideaId);
     if (!selected) {
       return res.status(404).json({ success: false, error: "Idea not found" });
     }
-    await writeJson("active-idea.json", selected);
+    await storage.saveActiveIdea(selected);
     res.json({ success: true, selected });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -712,7 +682,7 @@ app.post("/api/vault/select", async (req, res) => {
 });
 
 app.get("/api/vault/active", async (req, res) => {
-  const active = await readJson("active-idea.json", null);
+  const active = await storage.getActiveIdea();
   res.json({ success: true, active });
 });
 
@@ -721,7 +691,7 @@ app.get("/api/vault/active", async (req, res) => {
 // ==========================================
 app.post("/api/research", async (req, res) => {
   try {
-    const activeIdea = await readJson("active-idea.json", null);
+    const activeIdea = await storage.getActiveIdea();
     if (!activeIdea) {
       return res.status(400).json({ success: false, error: "No active idea selected." });
     }
@@ -905,7 +875,7 @@ Produce a sourced, markdown-formatted report:
       reportContent = response.text;
     }
 
-    await writeMarkdown("research-report.md", reportContent);
+    await storage.saveResearchReport(reportContent);
 
     res.json({
       success: true,
@@ -931,12 +901,12 @@ const INTERVIEWERS = [
 
 app.post("/api/interview/start", async (req, res) => {
   try {
-    const activeIdea = await readJson("active-idea.json", null);
+    const activeIdea = await storage.getActiveIdea();
     if (!activeIdea) {
       return res.status(400).json({ success: false, error: "No active idea selected." });
     }
 
-    const researchReport = await readMarkdown("research-report.md", "No research report available.");
+    const researchReport = await storage.getResearchReport() || "No research report available.";
     const firstInterviewer = INTERVIEWERS[0];
 
     const prompt = `
@@ -975,7 +945,7 @@ Output your question as a short message.
       maxQuestions: maxQs
     };
 
-    await writeJson("active-interview.json", state);
+    await storage.saveActiveInterview(state);
     res.json({ success: true, state });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -983,13 +953,13 @@ Output your question as a short message.
 });
 
 app.get("/api/interview/status", async (req, res) => {
-  const state = await readJson("active-interview.json", null);
+  const state = await storage.getActiveInterview();
   res.json({ success: true, state });
 });
 
 app.post("/api/interview/answer", async (req, res) => {
   try {
-    const state = await readJson("active-interview.json", null);
+    const state = await storage.getActiveInterview();
     if (!state) {
       return res.status(400).json({ success: false, error: "No active interview session." });
     }
@@ -1052,7 +1022,7 @@ Do not include markdown wrappers. Return raw JSON.
     // If score is low (< 7), make them answer again / follow up
     if (evaluation.score < 7 && state.questionsAsked.length < state.maxQuestions) {
       state.currentQuestion = `${evaluation.feedback}\n\nCan you give me a specific story or actual number to back that up?`;
-      await writeJson("active-interview.json", state);
+      await storage.saveActiveInterview(state);
       return res.json({
         success: true,
         advance: false,
@@ -1076,7 +1046,7 @@ Do not include markdown wrappers. Return raw JSON.
       state.completed = true;
       state.currentInterviewer = "System";
       state.currentQuestion = "Interview completed! Ready to compile production markdown.";
-      await writeJson("active-interview.json", state);
+      await storage.saveActiveInterview(state);
 
       // Run Post-interview extraction pass
       try {
@@ -1123,7 +1093,7 @@ Do not wrap in markdown tags. Return raw JSON.
           extraction = JSON.parse(clean);
         }
 
-        await writeJson("interview-extraction.json", extraction);
+        await storage.saveInterviewExtraction(extraction);
         console.log("Saved interview extraction file successfully.");
       } catch (err) {
         console.error("Error during post-interview extraction:", err.message);
@@ -1139,7 +1109,7 @@ Do not wrap in markdown tags. Return raw JSON.
 
     // Transition to the next interviewer
     const nextInterviewer = INTERVIEWERS[state.questionsAsked.length % INTERVIEWERS.length];
-    const researchReport = await readMarkdown("research-report.md", "");
+    const researchReport = await storage.getResearchReport();
     const transcriptHistory = state.questionsAsked.map(q => `${q.interviewer}: ${q.question}\nCreator: ${q.answer}`).join("\n\n");
 
     const nextPrompt = `
@@ -1166,7 +1136,7 @@ Output your question as a short message.
     state.currentInterviewer = nextInterviewer.name;
     state.currentQuestion = nextResponse.text.trim();
 
-    await writeJson("active-interview.json", state);
+    await storage.saveActiveInterview(state);
 
     res.json({
       success: true,
@@ -1185,13 +1155,13 @@ Output your question as a short message.
 // ==========================================
 app.post("/api/production", async (req, res) => {
   try {
-    const interview = await readJson("active-interview.json", null);
+    const interview = await storage.getActiveInterview();
     if (!interview || !interview.completed) {
       return res.status(400).json({ success: false, error: "Interview must be completed first." });
     }
 
     const transcript = interview.questionsAsked.map(q => `${q.interviewer}: ${q.question}\nCreator: ${q.answer}`).join("\n\n");
-    const extraction = await readJson("interview-extraction.json", {});
+    const extraction = await storage.getInterviewExtraction();
 
     const prompt = `
 You are the Content Production compiler. Your job is to turn the interview transcript into a structured, raw reference Markdown file.
@@ -1224,7 +1194,7 @@ Generate a detailed markdown file.
     });
 
     const productionMarkdown = response.text;
-    await writeMarkdown("production-raw.md", productionMarkdown);
+    await storage.saveDraft("production-raw", productionMarkdown);
 
     res.json({
       success: true,
@@ -1244,11 +1214,22 @@ app.post("/api/refine", async (req, res) => {
     if (!contentType) {
       return res.status(400).json({ success: false, error: "Content type is required." });
     }
-    await writeJson("active-content-type.json", { contentType });
+    await storage.saveActiveContentType({ contentType });
 
-    const productionRaw = await readMarkdown("production-raw.md", "");
-    const styleGuide = await readMarkdown("style-guide.md", "");
-    const lessons = await readMarkdown("content-lessons.md", "No lessons logged yet.");
+    const productionRaw = await storage.getDraft("production-raw");
+    const styleGuide = await storage.getStyleGuide();
+    
+    // Load learnings from JSON database and format for the copywriter prompt (Bug Fix)
+    const learnings = await storage.getLearnings();
+    let lessonsText = "";
+    if (learnings.global && learnings.global.length > 0) {
+      lessonsText += "Global Lessons:\n" + learnings.global.map(l => `- [${l.category}] ${l.lesson}`).join("\n") + "\n";
+    }
+    const typeKey = contentType.toLowerCase().replace(/\s+/g, "_");
+    if (learnings.byContentType && learnings.byContentType[typeKey] && learnings.byContentType[typeKey].length > 0) {
+      lessonsText += `Lessons for ${contentType}:\n` + learnings.byContentType[typeKey].map(l => `- [${l.category}] ${l.lesson}`).join("\n") + "\n";
+    }
+    if (!lessonsText) lessonsText = "No lessons logged yet.";
 
     if (!productionRaw) {
       return res.status(400).json({ success: false, error: "No production file found. Complete the production step." });
@@ -1266,7 +1247,7 @@ ${productionRaw}
 ${styleGuide}
 
 - **Learnings & Lessons from Past Feedback (Overriding style guide on conflict)**:
-${lessons}
+${lessonsText}
 
 # Rules
 1. **Rule #1**: Write like you are texting a friend. 
@@ -1284,8 +1265,8 @@ Draft the first version. Do not include meta comments, just the content draft.
     });
 
     const draft = response.text;
-    await writeMarkdown("draft-first.md", draft);
-    await writeMarkdown("draft-current.md", draft);
+    await storage.saveDraft("first", draft);
+    await storage.saveDraft("current", draft);
 
     res.json({
       success: true,
@@ -1302,8 +1283,8 @@ Draft the first version. Do not include meta comments, just the content draft.
 app.post("/api/council", async (req, res) => {
   try {
     const { contentType } = req.body;
-    let draftCurrent = await readMarkdown("draft-current.md", "");
-    const productionRaw = await readMarkdown("production-raw.md", "");
+    let draftCurrent = await storage.getDraft("current");
+    const productionRaw = await storage.getDraft("production-raw");
     const styleSystem = await loadStyleSystem();
     const antiSlop = await loadAntiSlop();
     const goldenExamples = await loadGoldenExamples();
@@ -1488,10 +1469,10 @@ Output the revised draft. Do not include meta remarks.
         allEditorialFixes = [...allEditorialFixes, ...lintFixes];
       }
 
-      await writeMarkdown("draft-current.md", draftCurrent);
+      await storage.saveDraft("current", draftCurrent);
     }
 
-    await writeJson("active-run-score.json", { finalScore: currentScore });
+    await storage.saveActiveRunScore({ finalScore: currentScore });
 
     res.json({
       success: true,
@@ -1512,7 +1493,7 @@ Output the revised draft. Do not include meta remarks.
 // ==========================================
 app.post("/api/repurpose", async (req, res) => {
   try {
-    const approvedDraft = await readMarkdown("draft-current.md", "");
+    const approvedDraft = await storage.getDraft("current");
     if (!approvedDraft) {
       return res.status(400).json({ success: false, error: "No approved draft found. Create a draft first." });
     }
@@ -1654,7 +1635,7 @@ Provide the revised version. Output only the content.
     });
 
     const finalDerivatives = await Promise.all(gatePromises);
-    await writeJson("derivatives.json", finalDerivatives);
+    await storage.saveDerivatives(finalDerivatives);
 
     res.json({
       success: true,
@@ -1672,26 +1653,18 @@ Provide the revised version. Output only the content.
 app.post("/api/learning-loop", async (req, res) => {
   try {
     const { finalApprovedText } = req.body;
-    const firstDraft = await readMarkdown("draft-first.md", "");
+    const firstDraft = await storage.getDraft("first");
     
     if (!firstDraft || !finalApprovedText) {
       return res.status(400).json({ success: false, error: "Must have the first draft and final approved text to compare." });
     }
 
-    const lessonsData = await readJson("content-lessons.json", {
-      global: [],
-      byContentType: {},
-      metrics: {
-        averageScoreHistory: [],
-        lessonCount: 0,
-        lastUpdated: new Date().toISOString().split("T")[0]
-      }
-    });
+    const lessonsData = await storage.getLearnings();
 
-    const activeContentTypeData = await readJson("active-content-type.json", { contentType: "all" });
+    const activeContentTypeData = await storage.getActiveContentType();
     const activeContentType = activeContentTypeData.contentType.toLowerCase().replace(/\s+/g, "_");
 
-    const activeScoreData = await readJson("active-run-score.json", { finalScore: 8.0 });
+    const activeScoreData = await storage.getActiveRunScore();
     const todayStr = new Date().toISOString().split("T")[0];
 
     const prompt = `
@@ -1778,8 +1751,8 @@ Do not wrap in markdown tags. Return raw JSON.
       lastUpdated: todayStr
     };
 
-    await writeJson("content-lessons.json", lessonsData);
-    await writeMarkdown("draft-final-approved.md", finalApprovedText);
+    await storage.saveLearnings(lessonsData);
+    await storage.saveDraft("final-approved", finalApprovedText);
 
     res.json({
       success: true,
@@ -1792,18 +1765,9 @@ Do not wrap in markdown tags. Return raw JSON.
   }
 });
 
-// Endpoint to retrieve learning loop metrics for the dashboard
 app.get("/api/learning-loop/metrics", async (req, res) => {
   try {
-    const lessonsData = await readJson("content-lessons.json", {
-      global: [],
-      byContentType: {},
-      metrics: {
-        averageScoreHistory: [],
-        lessonCount: 0,
-        lastUpdated: new Date().toISOString().split("T")[0]
-      }
-    });
+    const lessonsData = await storage.getLearnings();
 
     const totalLessons = (lessonsData.global?.length || 0) + 
       Object.values(lessonsData.byContentType || {}).reduce((acc, list) => acc + (Array.isArray(list) ? list.length : 0), 0);
@@ -1856,7 +1820,7 @@ app.get("/api/file/:name", async (req, res) => {
     if (name.includes("..") || name.includes("/") || name.includes("\\")) {
       return res.status(400).json({ error: "Invalid filename" });
     }
-    const content = await readMarkdown(name, "");
+    const content = await storage.readRawFile(name);
     res.json({ success: true, content });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -1882,7 +1846,7 @@ app.post("/api/settings/save-file", async (req, res) => {
       }
     }
     
-    await fs.writeFile(path.join(DB_DIR, name), content, "utf-8");
+    await storage.writeRawFile(name, content);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -1893,7 +1857,7 @@ app.post("/api/settings/save-file", async (req, res) => {
 app.post("/api/settings/save-style", async (req, res) => {
   try {
     const { content } = req.body;
-    await writeMarkdown("style-guide.md", content);
+    await storage.saveStyleGuide(content);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
