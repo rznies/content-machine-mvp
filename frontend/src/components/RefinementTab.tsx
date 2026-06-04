@@ -18,6 +18,7 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
   const [lessons, setLessons] = useState('No lessons logged yet. Future loops will populate this.');
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(false);
+  const [drafted, setDrafted] = useState(false);
 
   const loadData = async () => {
     try {
@@ -42,6 +43,7 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
       const resDraft = await api.getFile('draft-current.md');
       if (resDraft.success && resDraft.content.trim() !== '') {
         setDraft(resDraft.content);
+        setDrafted(true);
       }
     } catch {
       // Ignore
@@ -53,6 +55,11 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
   }, [activeIdea]);
 
   const handleDraft = async () => {
+    if (drafted) {
+      onNavigateToTab('council');
+      return;
+    }
+
     setLoading(true);
     setDraft('');
     onLog('info', `Drafting first version of "${contentType}" using style guide and past lessons...`);
@@ -62,9 +69,7 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
       if (res.success) {
         onLog('success', 'First draft created. Saved to draft-first.md.');
         setDraft(res.draft);
-        setTimeout(() => {
-          onNavigateToTab('council');
-        }, 1500);
+        setDrafted(true);
       }
     } catch (err: any) {
       onLog('error', `Drafting failed: ${err.message || err}`);
@@ -120,6 +125,10 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
               <>
                 <ArrowsClockwise className="w-3.5 h-3.5 animate-spin" />
                 <span>Drafting content...</span>
+              </>
+            ) : drafted ? (
+              <>
+                <span>Continue to Polish draft &rarr;</span>
               </>
             ) : (
               <>

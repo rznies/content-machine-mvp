@@ -18,6 +18,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
   const [loading, setLoading] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
   const [mockData, setMockData] = useState<MockData | null>(null);
+  const [mined, setMined] = useState(false);
 
   useEffect(() => {
     // Load mock inputs preview on mount
@@ -39,6 +40,11 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
   }, []);
 
   const handleMine = async () => {
+    if (mined) {
+      onNavigateToTab('vault');
+      return;
+    }
+
     setLoading(true);
     onLog('info', 'Starting Oracle Mining pass across Slack, Gmail, X, and Notion logs...');
 
@@ -46,16 +52,13 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
       const res = await api.mineOracle();
       if (res.success) {
         onLog('success', `Oracle identified & qualified ${res.minedCount} new content ideas from data feeds!`);
-        setTimeout(() => {
-          setLoading(false);
-          // Redirect to Vault
-          onNavigateToTab('vault');
-        }, 1500);
+        setMined(true);
       } else {
         throw new Error('API reported failure');
       }
     } catch (err: any) {
       onLog('error', `Oracle mining failed: ${err.message || err}`);
+    } finally {
       setLoading(false);
     }
   };
@@ -186,10 +189,14 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
                 </svg>
                 <span>Mining Feeds (Running Oracle)...</span>
               </>
+            ) : mined ? (
+              <>
+                <span>Continue to Pick an Idea &rarr;</span>
+              </>
             ) : (
               <>
                 <Lightning className="w-5 h-5" />
-                <span>Start Mining Pass</span>
+                <span>Scan all sources</span>
               </>
             )}
           </button>

@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { api, Idea } from './lib/api';
+import { useEffect } from 'react';
+import { useApp } from './context/AppContext';
 import { OracleTab } from './components/OracleTab';
 import { VaultTab } from './components/VaultTab';
 import { ResearcherTab } from './components/ResearcherTab';
@@ -11,263 +11,280 @@ import { RepurposeTab } from './components/RepurposeTab';
 import { RevisionTab } from './components/RevisionTab';
 import { LearningTab } from './components/LearningTab';
 import { SettingsTab } from './components/SettingsTab';
+import { StatusPill } from './components/StatusPill';
+import { ThemeToggle } from './components/ThemeToggle';
+import { ActivityPanel } from './components/ActivityPanel';
 
 import { 
   Lightning, 
   Gear, 
-  TerminalWindow, 
-  Trash,
-  CaretDown,
-  CaretUp
+  Bell, 
+  Lock, 
+  Check, 
+  User,
+  Dot
 } from '@phosphor-icons/react';
 import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 
-interface LogLine {
-  type: 'info' | 'success' | 'warning' | 'error';
-  message: string;
-  time: string;
-}
+const PHASES = [
+  {
+    name: 'FIND',
+    label: 'Find and pick an idea',
+    steps: ['oracle', 'vault']
+  },
+  {
+    name: 'BUILD',
+    label: 'Research, gather, draft',
+    steps: ['researcher', 'interview', 'production', 'refinement']
+  },
+  {
+    name: 'PUBLISH & LEARN',
+    label: 'Polish, post, edit, learn',
+    steps: ['council', 'repurpose', 'revision', 'learning']
+  }
+];
 
-const STEP_DETAILS: Record<string, { title: string; desc: string; badge: string; badgeType: 'ai' | 'human' | 'hybrid' }> = {
-  oracle: { title: "The Oracle", desc: "Mines internal feeds for content spikes.", badge: "AI", badgeType: "ai" },
-  vault: { title: "The Vault", desc: "Curated content ideas pipeline.", badge: "Human", badgeType: "human" },
-  researcher: { title: "The Researcher", desc: "Sourced research reports.", badge: "AI", badgeType: "ai" },
-  interview: { title: "Interview Panel", desc: "Challenge ideas to extract stories.", badge: "AI + Human", badgeType: "hybrid" },
-  production: { title: "Production", desc: "Compiles structured Markdown.", badge: "AI", badgeType: "ai" },
-  refinement: { title: "Refinement", desc: "Drafts content in your voice.", badge: "AI + Human", badgeType: "hybrid" },
-  council: { title: "Writer's Council", desc: "Expert reviewers score your draft.", badge: "AI", badgeType: "ai" },
-  repurpose: { title: "Repurposing", desc: "Transforms the finalized anchor post.", badge: "AI", badgeType: "ai" },
-  revision: { title: "Final Revision", desc: "Fine-tune the draft manually.", badge: "Human", badgeType: "human" },
-  learning: { title: "Learning Loop", desc: "Extracts writing lessons.", badge: "AI", badgeType: "ai" },
-  settings: { title: "Settings", desc: "System configuration.", badge: "System", badgeType: "human" }
+const STEP_DETAILS: Record<string, { title: string; desc: string; index: number }> = {
+  oracle: { title: "Find ideas", desc: "Scan messages, notes, and feeds for things worth writing about.", index: 1 },
+  vault: { title: "Pick an idea", desc: "Choose the one you want to turn into a post.", index: 2 },
+  researcher: { title: "Research", desc: "Get the facts, sources, and quotes.", index: 3 },
+  interview: { title: "Answer questions", desc: "We ask, you talk. We pull out your real stories.", index: 4 },
+  production: { title: "Gather material", desc: "Pull out the best quotes, numbers, and moments.", index: 5 },
+  refinement: { title: "Write first draft", desc: "We draft it in your voice. You approve or redo.", index: 6 },
+  council: { title: "Polish draft", desc: "6 expert reviewers grade it. We revise until it's strong.", index: 7 },
+  repurpose: { title: "Post to platforms", desc: "Pick where you want it to appear.", index: 8 },
+  revision: { title: "Final edit", desc: "Your last changes before publishing.", index: 9 },
+  learning: { title: "What we learned", desc: "Style rules we picked up from this run.", index: 10 },
+  settings: { title: "Settings", desc: "System configuration & API connections.", index: 11 }
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState<string>('oracle');
-  const [activeIdea, setActiveIdea] = useState<Idea | null>(null);
-  const [logs, setLogs] = useState<LogLine[]>([
-    { type: 'info', message: 'Machine initialized. Ready for feed mining.', time: new Date().toLocaleTimeString() }
-  ]);
-  const [terminalExpanded, setTerminalExpanded] = useState(true);
-  const logsEndRef = useRef<HTMLDivElement>(null);
+  const {
+    activeTab,
+    setActiveTab,
+    activeIdea,
+    setActiveIdea,
+    logs,
+    addLog,
+    isActivityOpen,
+    setIsActivityOpen,
+    unreadLogsCount
+  } = useApp();
 
-  useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    if (hash && STEP_DETAILS[hash]) {
-      setActiveTab(hash);
+  const isStepLocked = (stepKey: string) => {
+    if (stepKey === 'oracle' || stepKey === 'vault' || stepKey === 'settings') return false;
+    return !activeIdea;
+  };
+
+  const getStepStatusIcon = (stepKey: string, isSelected: boolean) => {
+    const isLocked = isStepLocked(stepKey);
+    const details = STEP_DETAILS[stepKey];
+    const currentActiveDetails = STEP_DETAILS[activeTab];
+
+    if (isLocked) {
+      return <Lock size={12} className="text-zinc-600 dark:text-zinc-700" />;
     }
-  }, []);
 
-  const handleTabChange = (tabName: string) => {
-    setActiveTab(tabName);
-    window.location.hash = tabName;
+    if (isSelected) {
+      return (
+        <span className="flex h-4 w-4 items-center justify-center relative">
+          <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-primary opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary"></span>
+        </span>
+      );
+    }
+
+    // Done status logic (if an active idea is selected, finding and picking is done)
+    if (activeIdea) {
+      if (details.index < currentActiveDetails.index) {
+        return <Check size={12} className="text-emerald-500 font-bold" />;
+      }
+    }
+
+    return <span className="h-1.5 w-1.5 rounded-full bg-zinc-600 dark:bg-zinc-700"></span>;
   };
-
-  const addLog = (type: 'info' | 'success' | 'warning' | 'error', message: string) => {
-    const time = new Date().toLocaleTimeString();
-    setLogs((prev) => [...prev, { type, message, time }]);
-  };
-
-  const clearLogs = () => {
-    setLogs([]);
-  };
-
-  useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs, terminalExpanded]);
-
-  useEffect(() => {
-    api.getActiveIdea()
-      .then((res) => {
-        if (res.success && res.active) {
-          setActiveIdea(res.active);
-          addLog('info', `Loaded: "${res.active.title}"`);
-        }
-      })
-      .catch(() => {
-        addLog('error', 'Failed to connect to backend.');
-      });
-  }, []);
 
   const renderActiveTabContent = () => {
     switch (activeTab) {
-      case 'oracle': return <OracleTab onLog={addLog} onNavigateToTab={handleTabChange} />;
-      case 'vault': return <VaultTab activeIdea={activeIdea} onActiveIdeaChange={setActiveIdea} onLog={addLog} onNavigateToTab={handleTabChange} />;
+      case 'oracle': return <OracleTab onLog={addLog} onNavigateToTab={setActiveTab} />;
+      case 'vault': return <VaultTab activeIdea={activeIdea} onActiveIdeaChange={setActiveIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
       case 'researcher': return <ResearcherTab activeIdea={activeIdea} onLog={addLog} />;
-      case 'interview': return <InterviewTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={handleTabChange} />;
-      case 'production': return <ProductionTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={handleTabChange} />;
-      case 'refinement': return <RefinementTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={handleTabChange} />;
-      case 'council': return <CouncilTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={handleTabChange} />;
-      case 'repurpose': return <RepurposeTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={handleTabChange} />;
-      case 'revision': return <RevisionTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={handleTabChange} />;
+      case 'interview': return <InterviewTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
+      case 'production': return <ProductionTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
+      case 'refinement': return <RefinementTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
+      case 'council': return <CouncilTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
+      case 'repurpose': return <RepurposeTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
+      case 'revision': return <RevisionTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
       case 'learning': return <LearningTab activeIdea={activeIdea} />;
       case 'settings': return <SettingsTab onLog={addLog} />;
       default: return <div className="text-zinc-400">Under Construction</div>;
     }
   };
 
-  const getBadgeClass = (type: 'ai' | 'human' | 'hybrid') => {
-    switch (type) {
-      case 'ai': return 'bg-primary/10 text-primary border-primary/20';
-      case 'human': return 'bg-zinc-800 text-zinc-300 border-zinc-700';
-      case 'hybrid': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-    }
-  };
-
   return (
-    <div className="flex h-[100dvh] w-screen overflow-hidden bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
+    <div className="flex h-[100dvh] w-screen overflow-hidden bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-300">
+      
       {/* Sidebar Navigation */}
-      <aside className="w-64 border-r border-border bg-zinc-950/30 flex flex-col justify-between shrink-0">
-        <div className="flex-1 flex flex-col overflow-y-auto custom-scroll">
-          {/* Logo brand */}
-          <div className="flex items-center gap-3 p-6 border-b border-border">
-            <div className="flex h-8 w-8 items-center justify-center bg-primary text-white font-bold">
-              <Lightning weight="fill" className="w-4 h-4" />
-            </div>
-            <div>
-              <h1 className="text-sm font-semibold tracking-tight">Content Machine</h1>
-              <p className="text-[10px] text-zinc-500 font-mono tracking-wider uppercase mt-0.5">Media Co.</p>
-            </div>
+      <aside className="w-60 border-r border-border bg-zinc-950/20 flex flex-col shrink-0 select-none">
+        
+        {/* Brand logo */}
+        <div className="flex items-center gap-3 p-5 border-b border-border">
+          <div className="flex h-7 w-7 items-center justify-center bg-primary text-white font-bold rounded-lg shadow-lg shadow-primary/20">
+            <Lightning weight="fill" className="w-4 h-4" />
           </div>
-
-          {/* Active status display card */}
-          <div className="px-5 py-4 border-b border-border bg-zinc-950/50">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block">Active Run</label>
-            <div className={twMerge(
-              "mt-2 py-2 px-3 rounded-md border text-xs leading-normal truncate",
-              activeIdea ? "bg-primary/5 border-primary/20 text-primary font-medium" : "bg-zinc-900/50 border-zinc-800 text-zinc-600 italic"
-            )}>
-              {activeIdea ? activeIdea.title : 'No idea selected'}
-            </div>
+          <div>
+            <h1 className="text-xs font-semibold tracking-tight text-foreground">Content Machine</h1>
+            <p className="text-[9px] text-zinc-500 font-mono tracking-widest uppercase">Media Pipeline</p>
           </div>
-
-          {/* Navigation Links */}
-          <nav className="flex-1 px-3 py-4 space-y-1">
-            {Object.entries(STEP_DETAILS).map(([key, value], idx) => {
-              if (key === 'settings') return null;
-              const isSelected = activeTab === key;
-              const stepNumber = String(idx + 1).padStart(2, '0');
-              return (
-                <button
-                  key={key}
-                  onClick={() => handleTabChange(key)}
-                  className={twMerge(
-                    "w-full flex items-center justify-between py-2 px-3 rounded-md transition-all active:scale-[0.98] text-xs font-medium",
-                    isSelected ? "bg-zinc-900 text-foreground" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40"
-                  )}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className={twMerge("text-[10px] font-mono", isSelected ? "text-primary" : "text-zinc-600")}>
-                      {stepNumber}
-                    </span>
-                    <span>{value.title}</span>
-                  </span>
-                  <span className={twMerge(
-                    "text-[9px] px-1.5 py-0.5 rounded border uppercase shrink-0 font-mono font-medium",
-                    isSelected ? "bg-primary/10 text-primary border-primary/20" : "bg-zinc-900 text-zinc-500 border-zinc-800"
-                  )}>
-                    {value.badge}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-border bg-zinc-950/80 space-y-3 shrink-0">
-          <button
-            onClick={() => handleTabChange('settings')}
-            className={twMerge(
-              "w-full flex items-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition-all active:scale-[0.98]",
-              activeTab === 'settings' ? "bg-zinc-900 text-foreground" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40"
-            )}
-          >
-            <Gear weight="bold" className="w-4 h-4" />
-            <span>Settings</span>
-          </button>
+        {/* Sidebar Nav Items */}
+        <div className="flex-1 overflow-y-auto custom-scroll px-3 py-4 space-y-5">
+          {PHASES.map((phase) => (
+            <div key={phase.name} className="space-y-1.5">
+              <div className="px-2">
+                <span className="text-[9px] font-mono font-bold text-zinc-500 dark:text-zinc-600 tracking-widest block uppercase">
+                  {phase.name}
+                </span>
+                <span className="text-[8px] text-zinc-600 dark:text-zinc-700 block tracking-wide mt-0.5">
+                  {phase.label}
+                </span>
+              </div>
+
+              <div className="space-y-0.5">
+                {phase.steps.map((stepKey) => {
+                  const isSelected = activeTab === stepKey;
+                  const isLocked = isStepLocked(stepKey);
+                  const step = STEP_DETAILS[stepKey];
+                  const stepNumber = String(step.index).padStart(2, '0');
+
+                  return (
+                    <button
+                      key={stepKey}
+                      onClick={() => !isLocked && setActiveTab(stepKey)}
+                      disabled={isLocked}
+                      title={isLocked ? "Pick an idea in the Vault first to unlock this step." : step.desc}
+                      className={clsx(
+                        "w-full flex items-center justify-between py-1.5 px-2 rounded-lg transition-all text-xs font-medium relative group",
+                        isSelected
+                          ? "bg-zinc-900/60 dark:bg-zinc-800/40 text-foreground border border-zinc-800/40"
+                          : "text-zinc-500 hover:text-zinc-300 dark:text-zinc-500 dark:hover:text-zinc-700 hover:bg-zinc-900/10 border border-transparent",
+                        isLocked && "opacity-40 cursor-not-allowed"
+                      )}
+                    >
+                      <span className="flex items-center gap-2.5 truncate">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+                          {getStepStatusIcon(stepKey, isSelected)}
+                        </span>
+                        <span className="font-mono text-[10px] opacity-40 group-hover:opacity-70 transition-opacity">
+                          {stepNumber}
+                        </span>
+                        <span className="truncate">{step.title}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </aside>
 
-      {/* Main Workspace Area */}
-      <main className="flex-1 flex flex-col min-w-0">
-        {/* Workspace Header */}
-        <header className="p-6 border-b border-border bg-zinc-950/10 shrink-0">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              {STEP_DETAILS[activeTab]?.title}
-            </h2>
-            {STEP_DETAILS[activeTab]?.badge && (
-              <span className="text-[10px] font-mono uppercase bg-zinc-900 text-zinc-400 px-2 py-0.5 border border-zinc-800 rounded">
-                {STEP_DETAILS[activeTab].badge}
-              </span>
-            )}
+      {/* Main Content Workspace */}
+      <main className="flex-1 flex flex-col min-w-0 h-full relative bg-zinc-900/10">
+        
+        {/* Top Bar Navigation */}
+        <header className="h-14 border-b border-border bg-zinc-950/10 px-6 flex items-center justify-between select-none shrink-0 backdrop-blur-md">
+          {/* Left - Active Idea */}
+          <div className="flex items-center gap-2 max-w-[40%]">
+            <span className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">Idea:</span>
+            <div 
+              title={activeIdea ? activeIdea.title : "No active run"}
+              className={clsx(
+                "text-xs leading-none font-medium truncate max-w-xs",
+                activeIdea ? "text-primary hover:underline cursor-pointer" : "text-zinc-600 italic"
+              )}
+              onClick={() => activeIdea && setActiveTab('vault')}
+            >
+              {activeIdea ? activeIdea.title : 'None selected'}
+            </div>
           </div>
-          <p className="text-sm text-zinc-400 mt-1.5 max-w-[65ch]">
-            {STEP_DETAILS[activeTab]?.desc}
-          </p>
+
+          {/* Center - Active Tab Title */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold tracking-tight text-foreground">
+              {STEP_DETAILS[activeTab]?.title}
+            </span>
+            <StatusPill />
+          </div>
+
+          {/* Right - Global Actions */}
+          <div className="flex items-center gap-2">
+            
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
+            {/* Settings Gear */}
+            <button
+              onClick={() => setActiveTab('settings')}
+              title="Settings"
+              className={clsx(
+                "p-2 hover:bg-zinc-900 border rounded-xl transition-all duration-200 active:scale-95",
+                activeTab === 'settings'
+                  ? "bg-zinc-900 text-foreground border-zinc-800"
+                  : "text-zinc-400 hover:text-foreground border-transparent hover:border-zinc-800"
+              )}
+            >
+              <Gear size={18} weight={activeTab === 'settings' ? 'fill' : 'bold'} />
+            </button>
+
+            {/* Activity Panel Bell */}
+            <button
+              onClick={() => setIsActivityOpen(!isActivityOpen)}
+              title="Activity log"
+              className={clsx(
+                "p-2 hover:bg-zinc-900 border rounded-xl transition-all duration-200 active:scale-95 relative",
+                isActivityOpen
+                  ? "bg-zinc-900 text-foreground border-zinc-800"
+                  : "text-zinc-400 hover:text-foreground border-transparent hover:border-zinc-800"
+              )}
+            >
+              <Bell size={18} weight={isActivityOpen ? 'fill' : 'bold'} />
+              {unreadLogsCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white scale-90 border border-background">
+                  {unreadLogsCount}
+                </span>
+              )}
+            </button>
+
+            {/* Profile Avatar (decorative) */}
+            <div className="h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 cursor-pointer hover:bg-zinc-800/80 transition-colors ml-1">
+              <User size={14} weight="bold" />
+            </div>
+          </div>
         </header>
 
-        {/* Tab Workspace content */}
+        {/* Content Workspace Area */}
         <div className="flex-1 p-6 overflow-y-auto custom-scroll min-w-0 relative">
-          {renderActiveTabContent()}
+          
+          {/* Section Breadcrumb/Header */}
+          <div className="mb-5 select-none pb-4 border-b border-zinc-800/30">
+            <h2 className="text-base font-semibold tracking-tight text-foreground flex items-center gap-2">
+              <span>Step {STEP_DETAILS[activeTab]?.index}: {STEP_DETAILS[activeTab]?.title}</span>
+            </h2>
+            <p className="text-xs text-zinc-500 mt-1 max-w-[70ch]">
+              {STEP_DETAILS[activeTab]?.desc}
+            </p>
+          </div>
+
+          {/* Active Tab View */}
+          <div className="relative min-w-0">
+            {renderActiveTabContent()}
+          </div>
         </div>
 
-        {/* System Logs console */}
-        <div className="border-t border-border bg-zinc-950 shrink-0">
-          <div 
-            onClick={() => setTerminalExpanded(!terminalExpanded)}
-            className="p-3 bg-zinc-950/80 flex items-center justify-between text-[11px] font-medium tracking-wide text-zinc-400 border-b border-border cursor-pointer hover:bg-zinc-900/50 select-none transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <TerminalWindow weight="bold" className="w-4 h-4 text-zinc-500" />
-              <span>SYSTEM LOGS</span>
-              <span className="font-mono text-[10px] text-zinc-600 bg-zinc-900 py-0.5 px-1.5 rounded">{logs.length}</span>
-            </div>
-            
-            <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-              <button 
-                onClick={clearLogs}
-                title="Clear Logs"
-                className="p-1 hover:text-rose-400 text-zinc-500 transition-colors"
-              >
-                <Trash weight="bold" className="w-3.5 h-3.5" />
-              </button>
-              <button 
-                onClick={() => setTerminalExpanded(!terminalExpanded)}
-                className="p-1 hover:text-foreground text-zinc-500 transition-colors"
-              >
-                {terminalExpanded ? <CaretDown weight="bold" className="w-4 h-4" /> : <CaretUp weight="bold" className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-          
-          {terminalExpanded && (
-            <div className="h-32 p-3 font-mono text-[11px] leading-relaxed overflow-y-auto bg-black text-zinc-400 custom-scroll select-text">
-              {logs.length === 0 ? (
-                <div className="text-zinc-600 italic select-none">Console empty.</div>
-              ) : (
-                logs.map((log, idx) => {
-                  let colorClass = 'text-zinc-500';
-                  if (log.type === 'success') colorClass = 'text-emerald-500';
-                  if (log.type === 'warning') colorClass = 'text-amber-500';
-                  if (log.type === 'error') colorClass = 'text-rose-500';
-                  return (
-                    <div key={idx} className="flex gap-3 py-0.5 hover:bg-white/5 transition-colors">
-                      <span className="text-zinc-600 shrink-0 select-none">{log.time}</span>
-                      <span className={twMerge(colorClass, "shrink-0 select-none uppercase font-bold w-[6ch]")}>
-                        {log.type}
-                      </span>
-                      <span className="text-zinc-300 break-all">{log.message}</span>
-                    </div>
-                  );
-                })
-              )}
-              <div ref={logsEndRef} />
-            </div>
-          )}
-        </div>
+        {/* Activity Panel Slide-over */}
+        <ActivityPanel />
       </main>
     </div>
   );

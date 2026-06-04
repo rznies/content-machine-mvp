@@ -17,6 +17,7 @@ export const RepurposeTab: React.FC<RepurposeTabProps> = ({
   const [activePlatform, setActivePlatform] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [generated, setGenerated] = useState(false);
 
   const loadDerivatives = async () => {
     try {
@@ -27,8 +28,9 @@ export const RepurposeTab: React.FC<RepurposeTabProps> = ({
         if (parsed.length > 0) {
           setActivePlatform(parsed[0].platform);
         }
+        setGenerated(true);
       }
-    } catch {
+    } catch (consts) {
       // Ignore
     }
   };
@@ -38,6 +40,11 @@ export const RepurposeTab: React.FC<RepurposeTabProps> = ({
   }, [activeIdea]);
 
   const handleGenerate = async () => {
+    if (generated) {
+      onNavigateToTab('revision');
+      return;
+    }
+
     setLoading(true);
     onLog('info', 'Generating 8 platform-native derivatives (Twitter/X thread, LinkedIn, Newsletter, Short Script, Quote graphics, SEO Blog, etc.) and running Quality Gate review...');
 
@@ -49,9 +56,7 @@ export const RepurposeTab: React.FC<RepurposeTabProps> = ({
         if (res.derivatives.length > 0) {
           setActivePlatform(res.derivatives[0].platform);
         }
-        setTimeout(() => {
-          onNavigateToTab('revision');
-        }, 1500);
+        setGenerated(true);
       }
     } catch (err: any) {
       onLog('error', `Repurposing failed: ${err.message || err}`);
@@ -93,6 +98,10 @@ export const RepurposeTab: React.FC<RepurposeTabProps> = ({
             <>
               <ArrowsClockwise className="w-4 h-4 animate-spin" />
               <span>Generating Derivatives...</span>
+            </>
+          ) : generated ? (
+            <>
+              <span>Continue to Final Edit &rarr;</span>
             </>
           ) : (
             <>

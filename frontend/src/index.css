@@ -41,7 +41,39 @@
     --input: 0 0% 12%;
     --ring: 220 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+  }
+
+  .light {
+    /* Warm Off-White Background */
+    --background: 60 9% 97.5%;
+    --foreground: 0 0% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 98%;
+    --popover-foreground: 0 0% 10%;
+
+    /* Electric Blue Accent */
+    --primary: 220 100% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 92%;
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 220 100% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 86%;
+    --input: 0 0% 86%;
+    --ring: 220 100% 45%;
   }
 }
 

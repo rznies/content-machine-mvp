@@ -16,14 +16,16 @@ export const ProductionTab: React.FC<ProductionTabProps> = ({
 }) => {
   const [productionText, setProductionText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [compiled, setCompiled] = useState(false);
 
   const loadProduction = async () => {
     try {
       const res = await api.getFile('production-raw.md');
       if (res.success && res.content.trim() !== '') {
         setProductionText(res.content);
+        setCompiled(true);
       }
-    } catch {
+    } catch (consts) {
       // Ignore
     }
   };
@@ -33,6 +35,11 @@ export const ProductionTab: React.FC<ProductionTabProps> = ({
   }, [activeIdea]);
 
   const handleCompile = async () => {
+    if (compiled) {
+      onNavigateToTab('refinement');
+      return;
+    }
+
     setLoading(true);
     onLog('info', 'Compiling production transcript to raw reference markdown...');
 
@@ -41,9 +48,7 @@ export const ProductionTab: React.FC<ProductionTabProps> = ({
       if (res.success) {
         onLog('success', 'Production markdown successfully compiled & saved to production-raw.md.');
         setProductionText(res.productionRaw);
-        setTimeout(() => {
-          onNavigateToTab('refinement');
-        }, 1500);
+        setCompiled(true);
       }
     } catch (err: any) {
       onLog('error', `Production compilation failed: ${err.message || err}`);
@@ -75,6 +80,10 @@ export const ProductionTab: React.FC<ProductionTabProps> = ({
             <>
               <ArrowsClockwise className="w-4 h-4 animate-spin" />
               <span>Compiling Raw File...</span>
+            </>
+          ) : compiled ? (
+            <>
+              <span>Continue to Write first draft &rarr;</span>
             </>
           ) : (
             <>

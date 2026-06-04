@@ -18,6 +18,11 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
   const [loading, setLoading] = useState(false);
 
   const handleReview = async () => {
+    if (finalScore !== null) {
+      onNavigateToTab('repurpose');
+      return;
+    }
+
     // Get target type from style state or select element
     // For convenience we fetch target content type from local storage or default it
     const refineSelect = document.getElementById('refine-content-type') as HTMLSelectElement | null;
@@ -34,11 +39,6 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
         setFinalScore(res.finalScore);
         setIterations(res.iterations);
         onLog('success', `Revision loop finished! Final Council Score: ${res.finalScore.toFixed(1)}/10 after ${res.iterationsCount} iterations.`);
-        
-        // Auto navigate to repurpose after 2.5 seconds
-        setTimeout(() => {
-          onNavigateToTab('repurpose');
-        }, 2500);
       }
     } catch (err: any) {
       onLog('error', `Writer's Council process failed: ${err.message || err}`);
@@ -72,6 +72,10 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
             <>
               <ArrowsClockwise className="w-4 h-4 animate-spin" />
               <span>Running Loop...</span>
+            </>
+          ) : finalScore !== null ? (
+            <>
+              <span>Continue to Post &rarr;</span>
             </>
           ) : (
             <>

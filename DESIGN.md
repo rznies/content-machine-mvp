@@ -308,6 +308,7 @@ PUBLISH & LEARN
 - Subtle progress text appears: "Reading 47 Slack messages…", "Looking
   through 12 emails…", "Asking the AI for ideas…".
 - After 5–10 seconds, results appear as cards.
+- A summary badge indicates how many duplicate ideas were automatically filtered out by semantic deduplication.
 
 **Result cards:**
 
@@ -514,7 +515,9 @@ For the admin / engineer.
   in .env" hint.
 - **Tavily API key** — same.
 - **Firecrawl API key** — same.
-- **Research mode** — toggle: Google Grounding / Tavily + Firecrawl.
+- **Slack Bot Token** — same (used for source feed ingestion).
+- **Research mode** — dynamically detected based on configured API keys:
+  Google Grounding (default), Tavily, or Tavily + Firecrawl.
 
 ### Section 3 — Advanced
 
@@ -551,7 +554,7 @@ Collapsed by default. For engineers.
 | Old (terminal) | New (activity card) |
 |---|---|
 | `info Oracle mining pass initiated` | "Looking through your messages and notes for things worth writing about." |
-| `success Oracle identified 7 ideas` | "Found 7 ideas. 3 look strong, 4 are stretches." |
+| `success Oracle identified 7 ideas` | "Found 11 ideas. 3 look strong, 4 are stretches. 4 duplicate concepts were automatically filtered." |
 | `info Council revision loop started` | "6 expert reviewers are reading your draft. This usually takes about a minute." |
 | `success Revision loop finished, final score 8.4` | "Nice work. 6 reviewers gave it an 8.4. We tightened paragraph 3." |
 | `error API failure status 500` | "Hmm, something went wrong on our end. Try again in a moment." |
