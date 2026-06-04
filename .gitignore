@@ -35,3 +35,15 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 .scratch/
+
+# Build assets
+public/assets/
+
+# Dynamic active DB states
+db/active-idea.json
+db/research-report.md
+db/active-interview.json
+db/interview-extraction.json
+
+# Scratch debug files
+test-key.js
