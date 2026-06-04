@@ -13,63 +13,38 @@ import { refineService } from "../services/refineService.js";
 import { councilService } from "../services/councilService.js";
 import { repurposeService } from "../services/repurposeService.js";
 import { learningLoopService } from "../services/learningLoopService.js";
+import { webService } from "../services/webService.js";
+import { feedCollectorService } from "../services/feedCollectorService.js";
 
-let originalFetch;
+let originalSearch;
+let originalScrape;
+let originalCollectAll;
+let originalSaveIdeaToNotion;
 
 // Setup InMemoryStorageAdapter before running tests
 test.before(async () => {
-  // Stub global fetch to prevent actual network calls during tests
-  originalFetch = globalThis.fetch;
-  globalThis.fetch = async (url, options) => {
-    const urlString = String(url);
-    if (urlString.includes("tavily.com")) {
-      return {
-        ok: true,
-        json: async () => ({
-          results: [
-            { url: "https://example.com/deep-modules", title: "Deep Modules Guide", content: "Deep modules have deep interfaces." }
-          ]
-        })
-      };
-    }
-    if (urlString.includes("firecrawl.dev")) {
-      return {
-        ok: true,
-        json: async () => ({
-          success: true,
-          data: {
-            markdown: "Scraped content about deep modules.",
-            metadata: { title: "Deep Modules Guide", description: "Deep modules have deep interfaces." }
-          }
-        })
-      };
-    }
-    if (urlString.includes("slack.com")) {
-      return {
-        ok: true,
-        json: async () => ({
-          ok: true,
-          messages: [
-            { client_msg_id: "ts1", ts: "1717500000", user: "User1", text: "We should collapse shallow modules to deepen them." }
-          ]
-        })
-      };
-    }
-    if (urlString.includes("api.notion.com")) {
-      return {
-        ok: true,
-        json: async () => ({
-          results: [
-            { type: "paragraph", paragraph: { rich_text: [{ plain_text: "Notion block content." }] } }
-          ]
-        })
-      };
-    }
-    if (originalFetch) {
-      return originalFetch(url, options);
-    }
-    return { ok: false, text: async () => "Not Found" };
-  };
+  // Save original functions to test them directly
+  originalSearch = webService.search;
+  originalScrape = webService.scrape;
+  originalCollectAll = feedCollectorService.collectAll;
+  originalSaveIdeaToNotion = feedCollectorService.saveIdeaToNotion;
+
+  // Stub Web & Ingestion Services to decouple them from AI logic tests
+  webService.search = async () => [
+    { url: "https://example.com/deep-modules", title: "Deep Modules Guide", content: "Deep modules have deep interfaces." }
+  ];
+  webService.scrape = async () => ({
+    markdown: "Scraped content about deep modules.",
+    title: "Deep Modules Guide",
+    description: "Deep modules have deep interfaces."
+  });
+  feedCollectorService.collectAll = async () => ({
+    slack: [{ id: "ts1", author: "User1", timestamp: "2026-06-04T12:00:00Z", text: "We should collapse shallow modules to deepen them." }],
+    gmail: [],
+    transcripts: [],
+    x_feed: []
+  });
+  feedCollectorService.saveIdeaToNotion = async () => true;
 
   // Mock API keys to enable full Tavily/Firecrawl pipeline testing
   process.env.TAVILY_API_KEY = "mock-tavily-key";
@@ -83,7 +58,15 @@ test.before(async () => {
     slack: [{ id: "ts1", author: "User1", timestamp: "2026-06-04T12:00:00Z", text: "We should collapse shallow modules to deepen them." }],
     gmail: [],
     transcripts: [],
-    x_feed: []
+    x_feed: [
+      {
+        id: "tweet_1",
+        author: "@levie",
+        timestamp: "2026-06-03T18:22:00Z",
+        text: "The next wave of software...",
+        link: "https://example.com/tweet_1"
+      }
+    ]
   });
   
   memStorage.store.set("style-system", { voice: { sentenceLength: { max: 25 }, readingLevel: { target: "Grade 7", max: "Grade 9" } } });
@@ -326,8 +309,119 @@ test("Interview Service - rejects low-scoring answers", async () => {
   assert.strictEqual(advanceResult.state.currentInterviewer, "Joe Rogan");
 });
 
-test.after(() => {
-  if (originalFetch) {
+test("Web Service - search returns Tavily results", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    return {
+      ok: true,
+      json: async () => ({
+        results: [
+          { url: "https://example.com/deep-modules", title: "Deep Modules Guide", content: "Deep modules have deep interfaces." }
+        ]
+      })
+    };
+  };
+  try {
+    const results = await originalSearch("test query", "mock-key");
+    assert.strictEqual(results.length, 1);
+    assert.strictEqual(results[0].title, "Deep Modules Guide");
+  } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test("Web Service - scrape returns Firecrawl markdown", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    return {
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: {
+          markdown: "Scraped content about deep modules.",
+          metadata: { title: "Deep Modules Guide", description: "Deep modules have deep interfaces." }
+        }
+      })
+    };
+  };
+  try {
+    const result = await originalScrape("https://example.com/deep-modules", "mock-key");
+    assert.ok(result);
+    assert.strictEqual(result.title, "Deep Modules Guide");
+    assert.strictEqual(result.markdown, "Scraped content about deep modules.");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Feed Collector Service - collectAll returns parsed feeds", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    const urlString = String(url);
+    if (urlString.includes("slack.com")) {
+      return {
+        ok: true,
+        json: async () => ({
+          ok: true,
+          messages: [
+            { client_msg_id: "ts1", ts: "1717500000", user: "User1", text: "We should collapse shallow modules to deepen them." }
+          ]
+        })
+      };
+    }
+    return { ok: false, text: async () => "Not Found" };
+  };
+
+  // Temporarily set API key so real flow (with mock fetch) runs
+  process.env.SLACK_BOT_TOKEN = "mock-token";
+  process.env.SLACK_CHANNEL_ID = "mock-channel";
+  
+  try {
+    const feeds = await originalCollectAll();
+    assert.ok(feeds.slack);
+    assert.strictEqual(feeds.slack.length, 1);
+    assert.strictEqual(feeds.slack[0].author, "User1");
+    // Verify scraping flow was executed using stubbed webService.scrape
+    assert.ok(feeds.x_feed[0].text.includes("Scraped content about deep modules."));
+  } finally {
+    delete process.env.SLACK_BOT_TOKEN;
+    delete process.env.SLACK_CHANNEL_ID;
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Feed Collector Service - saveIdeaToNotion executes fetch page creation", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    const urlString = String(url);
+    if (urlString.includes("api.notion.com")) {
+      return {
+        ok: true,
+        json: async () => ({
+          ok: true
+        })
+      };
+    }
+    return { ok: false, text: async () => "Not Found" };
+  };
+
+  process.env.NOTION_API_KEY = "mock-key";
+  process.env.NOTION_DATABASE_ID = "mock-db";
+  
+  try {
+    const success = await originalSaveIdeaToNotion({ title: "Idea 1", score: 8.5 });
+    assert.strictEqual(success, true);
+  } finally {
+    delete process.env.NOTION_API_KEY;
+    delete process.env.NOTION_DATABASE_ID;
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test.after(() => {
+  // Restore original methods
+  if (originalSearch) webService.search = originalSearch;
+  if (originalScrape) webService.scrape = originalScrape;
+  if (originalCollectAll) feedCollectorService.collectAll = originalCollectAll;
+  if (originalSaveIdeaToNotion) feedCollectorService.saveIdeaToNotion = originalSaveIdeaToNotion;
 });
