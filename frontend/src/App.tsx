@@ -119,7 +119,7 @@ function App() {
       case 'council': return <CouncilTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
       case 'repurpose': return <RepurposeTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
       case 'revision': return <RevisionTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
-      case 'learning': return <LearningTab activeIdea={activeIdea} />;
+      case 'learning': return <LearningTab />;
       case 'settings': return <SettingsTab />;
       default: return <div className="text-zinc-400">Under Construction</div>;
     }
