@@ -14,6 +14,7 @@ import { SettingsTab } from './components/SettingsTab';
 import { StatusPill } from './components/StatusPill';
 import { ThemeToggle } from './components/ThemeToggle';
 import { ActivityPanel } from './components/ActivityPanel';
+import { OnboardingTour } from './components/OnboardingTour';
 
 import { 
   Lightning, 
@@ -573,6 +574,8 @@ function App() {
           </div>
         </div>
       )}
+
+      <OnboardingTour />
     </div>
   );
 }

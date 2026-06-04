@@ -33,6 +33,8 @@ interface AppContextType {
   setStatus: (status: AppStatus) => void;
   contentType: string;
   setContentType: (contentType: string) => void;
+  showOnboarding: boolean;
+  setShowOnboarding: (show: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -51,6 +53,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isPinned, setIsPinnedState] = useState<boolean>(false);
   const [contentType, setContentType] = useState<string>('LinkedIn Post');
   const [unreadLogsCount, setUnreadLogsCount] = useState<number>(0);
+  const [showOnboarding, setShowOnboardingState] = useState<boolean>(() => {
+    return !localStorage.getItem('cm_onboarding_seen');
+  });
+
+  const setShowOnboarding = (show: boolean) => {
+    setShowOnboardingState(show);
+    if (!show) {
+      localStorage.setItem('cm_onboarding_seen', 'true');
+    }
+  };
   
   // Advanced Mode (Persisted in localStorage)
   const [isAdvancedMode, setIsAdvancedModeState] = useState<boolean>(() => {
@@ -216,7 +228,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         status,
         setStatus,
         contentType,
-        setContentType
+        setContentType,
+        showOnboarding,
+        setShowOnboarding
       }}
     >
       {children}

@@ -79,10 +79,6 @@ export class StorageInterface {
     throw new Error("Method 'getGoldenExamples()' not implemented.");
   }
 
-  async getMockInputs() {
-    throw new Error("Method 'getMockInputs()' not implemented.");
-  }
-
   async getInterviewExtraction() {
     throw new Error("Method 'getInterviewExtraction()' not implemented.");
   }

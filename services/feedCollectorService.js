@@ -1,4 +1,3 @@
-import { storage } from "../storage/index.js";
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
 import Parser from "rss-parser";
@@ -12,9 +11,8 @@ async function fetchRealSlack() {
   const token = process.env.SLACK_BOT_TOKEN;
   const channel = process.env.SLACK_CHANNEL_ID;
   if (!token || !channel) {
-    console.log("Slack config missing (SLACK_BOT_TOKEN/SLACK_CHANNEL_ID). Using mock Slack data.");
-    const mock = await storage.getMockInputs();
-    return mock.slack || [];
+    console.log("Slack config missing (SLACK_BOT_TOKEN/SLACK_CHANNEL_ID). Returning empty list.");
+    return [];
   }
 
   try {
@@ -31,14 +29,12 @@ async function fetchRealSlack() {
         text: m.text
       }));
     } else {
-      console.warn("Slack API response failed, using mock:", data.error);
-      const mock = await storage.getMockInputs();
-      return mock.slack || [];
+      console.warn("Slack API response failed:", data.error);
+      return [];
     }
   } catch (err) {
-    console.error("Slack fetch error, falling back to mock:", err.message);
-    const mock = await storage.getMockInputs();
-    return mock.slack || [];
+    console.error("Slack fetch error:", err.message);
+    return [];
   }
 }
 
@@ -46,9 +42,8 @@ async function fetchRealGmail() {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
   if (!user || !pass) {
-    console.log("Gmail IMAP config missing (GMAIL_USER/GMAIL_APP_PASSWORD). Using mock Gmail data.");
-    const mock = await storage.getMockInputs();
-    return mock.gmail || [];
+    console.log("Gmail IMAP config missing (GMAIL_USER/GMAIL_APP_PASSWORD). Returning empty list.");
+    return [];
   }
 
   const client = new ImapFlow({
@@ -86,9 +81,8 @@ async function fetchRealGmail() {
     await client.logout();
     return emails.reverse();
   } catch (err) {
-    console.error("Gmail IMAP fetch error, falling back to mock:", err.message);
-    const mock = await storage.getMockInputs();
-    return mock.gmail || [];
+    console.error("Gmail IMAP fetch error:", err.message);
+    return [];
   }
 }
 
@@ -96,9 +90,8 @@ async function fetchRealNotion() {
   const apiKey = process.env.NOTION_API_KEY;
   const pageIdsStr = process.env.NOTION_PAGE_IDS;
   if (!apiKey || !pageIdsStr) {
-    console.log("Notion page config missing (NOTION_API_KEY/NOTION_PAGE_IDS). Using mock transcripts/Notion data.");
-    const mock = await storage.getMockInputs();
-    return mock.transcripts || [];
+    console.log("Notion page config missing (NOTION_API_KEY/NOTION_PAGE_IDS). Returning empty list.");
+    return [];
   }
 
   try {
@@ -134,25 +127,18 @@ async function fetchRealNotion() {
       }
     }
 
-    if (notionNotes.length > 0) {
-      return notionNotes;
-    } else {
-      const mock = await storage.getMockInputs();
-      return mock.transcripts || [];
-    }
+    return notionNotes;
   } catch (err) {
-    console.error("Notion fetch error, falling back to mock:", err.message);
-    const mock = await storage.getMockInputs();
-    return mock.transcripts || [];
+    console.error("Notion fetch error:", err.message);
+    return [];
   }
 }
 
 async function fetchRealRSS() {
   const feedUrlsStr = process.env.FEED_URLS;
   if (!feedUrlsStr) {
-    console.log("FEED_URLS config missing. Using mock X feed.");
-    const mock = await storage.getMockInputs();
-    return mock.x_feed || [];
+    console.log("FEED_URLS config missing. Returning empty list.");
+    return [];
   }
 
   try {
@@ -174,16 +160,10 @@ async function fetchRealRSS() {
       });
     }
 
-    if (feedItems.length > 0) {
-      return feedItems;
-    } else {
-      const mock = await storage.getMockInputs();
-      return mock.x_feed || [];
-    }
+    return feedItems;
   } catch (err) {
-    console.error("RSS fetch error, falling back to mock:", err.message);
-    const mock = await storage.getMockInputs();
-    return mock.x_feed || [];
+    console.error("RSS fetch error:", err.message);
+    return [];
   }
 }
 

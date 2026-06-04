@@ -34,7 +34,8 @@ export const SettingsTab: React.FC = () => {
   const { 
     addLog, 
     isAdvancedMode, 
-    setIsAdvancedMode 
+    setIsAdvancedMode,
+    setShowOnboarding
   } = useApp();
 
   const [activeFile, setActiveFile] = useState('style-system.json');
@@ -175,6 +176,27 @@ export const SettingsTab: React.FC = () => {
   return (
     <div className="space-y-6 max-w-3xl mx-auto py-4 select-none animate-in fade-in duration-300 font-sans text-ink">
       
+      {/* Welcome Banner */}
+      <div className="p-5 rounded-lg border border-primary/20 bg-primary/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-ink flex items-center gap-2">
+            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current text-primary animate-pulse" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2.5c-.2 4.2-2.8 6.8-7 7 4.2.2 6.8 2.8 7 7 .2-4.2 2.8-6.8 7-7-4.2-.2-6.8-2.8-7-7z" />
+            </svg>
+            <span>Learn How Content Machine Works</span>
+          </h4>
+          <p className="text-xs text-muted max-w-[50ch] leading-relaxed">
+            Need a refresher on the co-authoring steps, the Writer's Council loop, or configuring your custom API keys? Take the quick tour.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowOnboarding(true)}
+          className="px-4 py-2 shrink-0 rounded-lg text-xs font-bold text-on-primary bg-primary hover:bg-primary-active active:scale-95 transition-all shadow-sm cursor-pointer"
+        >
+          Relaunch Tour
+        </button>
+      </div>
+
       {/* SECTION 1: Your Voice */}
       <section className="p-6 rounded-lg border border-hairline bg-surface-card space-y-4 shadow-sm">
         <div>
@@ -434,9 +456,9 @@ export const SettingsTab: React.FC = () => {
                   "px-2 py-0.5 text-[9px] font-semibold font-mono rounded border uppercase",
                   status?.hasSlackToken 
                     ? 'bg-success/10 text-success border-success/20 font-bold' 
-                    : 'bg-surface-soft text-muted border-hairline font-bold'
+                    : 'bg-surface-soft text-muted border-hairline'
                 )}>
-                  {status?.hasSlackToken ? 'Connected' : 'Mocked'}
+                  {status?.hasSlackToken ? 'Connected' : 'Not Connected'}
                 </span>
               )}
             </div>

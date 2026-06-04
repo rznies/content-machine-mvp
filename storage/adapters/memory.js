@@ -22,7 +22,6 @@ export class InMemoryStorageAdapter extends StorageInterface {
       { key: "derivatives", name: "derivatives.json", type: "json", defaultVal: [] },
       { key: "anti-slop", name: "anti-slop.json", type: "json", defaultVal: { bannedWords: [], bannedPatterns: [], replacements: {} } },
       { key: "golden-examples", name: "golden-examples.json", type: "json", defaultVal: [] },
-      { key: "mock-inputs", name: "mock-inputs.json", type: "json", defaultVal: {} },
       { key: "interview-extraction", name: "interview-extraction.json", type: "json", defaultVal: {} },
       { key: "active-content-type", name: "active-content-type.json", type: "json", defaultVal: { contentType: "all" } },
       { key: "active-run-score", name: "active-run-score.json", type: "json", defaultVal: { finalScore: 8.0 } }
@@ -139,10 +138,6 @@ export class InMemoryStorageAdapter extends StorageInterface {
 
   async getGoldenExamples() {
     return this.store.get("golden-examples") || [];
-  }
-
-  async getMockInputs() {
-    return this.store.get("mock-inputs") || {};
   }
 
   async getInterviewExtraction() {

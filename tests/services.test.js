@@ -1,6 +1,7 @@
 process.env.NODE_ENV = "test";
 import test from "node:test";
 import assert from "node:assert";
+import Parser from "rss-parser";
 import { setStorage, storage } from "../storage/index.js";
 import { InMemoryStorageAdapter } from "../storage/adapters/memory.js";
 import { ai } from "../services/ai.js";
@@ -373,9 +374,18 @@ test("Feed Collector Service - collectAll returns parsed feeds", async () => {
     return { ok: false, text: async () => "Not Found" };
   };
 
+  const originalParseURL = Parser.prototype.parseURL;
+  Parser.prototype.parseURL = async (url) => ({
+    title: "Example RSS",
+    items: [
+      { guid: "tweet_1", pubDate: new Date().toISOString(), title: "Tweet 1", contentSnippet: "The next wave of software...", link: "https://example.com/tweet_1" }
+    ]
+  });
+
   // Temporarily set API key so real flow (with mock fetch) runs
   process.env.SLACK_BOT_TOKEN = "mock-token";
   process.env.SLACK_CHANNEL_ID = "mock-channel";
+  process.env.FEED_URLS = "https://example.com/rss";
   
   try {
     const feeds = await originalCollectAll();
@@ -387,6 +397,8 @@ test("Feed Collector Service - collectAll returns parsed feeds", async () => {
   } finally {
     delete process.env.SLACK_BOT_TOKEN;
     delete process.env.SLACK_CHANNEL_ID;
+    delete process.env.FEED_URLS;
+    Parser.prototype.parseURL = originalParseURL;
     globalThis.fetch = originalFetch;
   }
 });

@@ -188,10 +188,6 @@ export class DiskStorageAdapter extends StorageInterface {
     return await this.readJson("golden-examples.json", []);
   }
 
-  async getMockInputs() {
-    return await this.readJson("mock-inputs.json", {});
-  }
-
   async getInterviewExtraction() {
     return await this.readJson("interview-extraction.json", {});
   }
