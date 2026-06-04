@@ -35,7 +35,10 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeIdea, setActiveIdeaState] = useState<Idea | null>(null);
-  const [activeTab, setActiveTabState] = useState<string>('oracle');
+  const [activeTab, setActiveTabState] = useState<string>(() => {
+    const hash = window.location.hash.substring(1);
+    return hash || 'home';
+  });
   const [status, setStatus] = useState<AppStatus>('ready');
   const [logs, setLogs] = useState<LogLine[]>([
     { type: 'info', message: 'Ready. Start by scanning all sources or picking an idea.', time: new Date().toLocaleTimeString() }
@@ -61,7 +64,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const handleTabChange = useCallback((tab: string) => {
     setActiveTabState(tab);
-    window.location.hash = tab;
+    window.location.hash = tab === 'home' ? '' : tab;
   }, []);
 
   // Update hash routing on mount or back navigation
@@ -70,6 +73,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const hash = window.location.hash.substring(1);
       if (hash && hash !== activeTab) {
         setActiveTabState(hash);
+      } else if (!hash && activeTab !== 'home') {
+        setActiveTabState('home');
       }
     };
     window.addEventListener('hashchange', handleHashChange);
@@ -78,6 +83,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const initialHash = window.location.hash.substring(1);
     if (initialHash) {
       setActiveTabState(initialHash);
+    } else {
+      setActiveTabState('home');
     }
     
     return () => window.removeEventListener('hashchange', handleHashChange);

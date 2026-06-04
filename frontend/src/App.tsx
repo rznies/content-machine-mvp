@@ -26,6 +26,8 @@ import {
 } from '@phosphor-icons/react';
 import { clsx } from "clsx";
 
+import { HomeScreen } from './components/HomeScreen';
+
 const PHASES = [
   {
     name: 'FIND',
@@ -45,6 +47,7 @@ const PHASES = [
 ];
 
 const STEP_DETAILS: Record<string, { title: string; desc: string; index: number }> = {
+  home: { title: "Dashboard", desc: "Welcome to your Content Machine dashboard.", index: 0 },
   oracle: { title: "Find ideas", desc: "Scan messages, notes, and feeds for things worth writing about.", index: 1 },
   vault: { title: "Pick an idea", desc: "Choose the one you want to turn into a post.", index: 2 },
   researcher: { title: "Research", desc: "Get the facts, sources, and quotes.", index: 3 },
@@ -72,7 +75,7 @@ function App() {
   } = useApp();
 
   const isStepLocked = (stepKey: string) => {
-    if (stepKey === 'oracle' || stepKey === 'vault' || stepKey === 'settings') return false;
+    if (stepKey === 'oracle' || stepKey === 'vault' || stepKey === 'settings' || stepKey === 'home') return false;
     return !activeIdea;
   };
 
@@ -106,6 +109,7 @@ function App() {
 
   const renderActiveTabContent = () => {
     switch (activeTab) {
+      case 'home': return <HomeScreen />;
       case 'oracle': return <OracleTab onLog={addLog} onNavigateToTab={setActiveTab} />;
       case 'vault': return <VaultTab activeIdea={activeIdea} onActiveIdeaChange={setActiveIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
       case 'researcher': return <ResearcherTab activeIdea={activeIdea} onLog={addLog} />;
@@ -116,7 +120,7 @@ function App() {
       case 'repurpose': return <RepurposeTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
       case 'revision': return <RevisionTab activeIdea={activeIdea} onLog={addLog} onNavigateToTab={setActiveTab} />;
       case 'learning': return <LearningTab activeIdea={activeIdea} />;
-      case 'settings': return <SettingsTab onLog={addLog} />;
+      case 'settings': return <SettingsTab />;
       default: return <div className="text-zinc-400">Under Construction</div>;
     }
   };
@@ -268,14 +272,16 @@ function App() {
         <div className="flex-1 p-6 overflow-y-auto custom-scroll min-w-0 relative">
           
           {/* Section Breadcrumb/Header */}
-          <div className="mb-5 select-none pb-4 border-b border-zinc-800/30">
-            <h2 className="text-base font-semibold tracking-tight text-foreground flex items-center gap-2">
-              <span>Step {STEP_DETAILS[activeTab]?.index}: {STEP_DETAILS[activeTab]?.title}</span>
-            </h2>
-            <p className="text-xs text-zinc-500 mt-1 max-w-[70ch]">
-              {STEP_DETAILS[activeTab]?.desc}
-            </p>
-          </div>
+          {activeTab !== 'home' && activeTab !== 'settings' && (
+            <div className="mb-5 select-none pb-4 border-b border-zinc-800/30">
+              <h2 className="text-base font-semibold tracking-tight text-foreground flex items-center gap-2">
+                <span>Step {STEP_DETAILS[activeTab]?.index}: {STEP_DETAILS[activeTab]?.title}</span>
+              </h2>
+              <p className="text-xs text-zinc-500 mt-1 max-w-[70ch]">
+                {STEP_DETAILS[activeTab]?.desc}
+              </p>
+            </div>
+          )}
 
           {/* Active Tab View */}
           <div className="relative min-w-0">
