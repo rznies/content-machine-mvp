@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { api, Idea } from '../lib/api';
-import { Plus, Check, Star, FolderOpen, X } from '@phosphor-icons/react';
+import { useApp } from '../context/AppContext';
+import { Plus, Check, Star, FolderOpen, X, CaretDown, CaretUp, ArrowRight, Chats, ArrowsClockwise } from '@phosphor-icons/react';
+import { clsx } from 'clsx';
 
 interface VaultTabProps {
   activeIdea: Idea | null;
-  onActiveIdeaChange: (idea: Idea) => void;
+  onActiveIdeaChange: (idea: Idea | null) => void;
   onLog: (type: 'info' | 'success' | 'warning' | 'error', message: string) => void;
   onNavigateToTab: (tab: string) => void;
 }
@@ -15,10 +17,13 @@ export const VaultTab: React.FC<VaultTabProps> = ({
   onLog,
   onNavigateToTab,
 }) => {
+  const { setStatus } = useApp();
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState<'recommended' | 'newest' | 'manual'>('recommended');
+  const [expandedRationaleId, setExpandedRationaleId] = useState<string | null>(null);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -43,18 +48,20 @@ export const VaultTab: React.FC<VaultTabProps> = ({
     loadVault();
   }, [activeIdea]);
 
-  const handleSelectIdea = async (ideaId: string) => {
-    onLog('info', 'Selecting active idea...');
+  const handleSelectIdea = async (idea: Idea) => {
+    setStatus('working');
+    onLog('info', `Selecting active runway concept: "${idea.title}"...`);
     try {
-      const res = await api.selectIdea(ideaId);
+      const res = await api.selectIdea(idea.id);
       if (res.success) {
         onActiveIdeaChange(res.selected);
         onLog('success', `Active pipeline idea selected: "${res.selected.title}"`);
-        // Navigate to researcher step
+        setStatus('ready');
         onNavigateToTab('researcher');
       }
     } catch (err: any) {
       onLog('error', `Failed to select idea: ${err.message || err}`);
+      setStatus('error');
     }
   };
 
@@ -66,11 +73,10 @@ export const VaultTab: React.FC<VaultTabProps> = ({
     onLog('info', `Manually adding new content idea: "${title}"...`);
 
     try {
-      const res = await api.addIdea(title, description, source);
+      const res = await api.addIdea(title, description, source || 'Manually added');
       if (res.success) {
         onLog('success', 'New idea saved to Vault.');
         setIdeas(res.vault);
-        // Reset form
         setTitle('');
         setDescription('');
         setSource('');
@@ -83,101 +89,170 @@ export const VaultTab: React.FC<VaultTabProps> = ({
     }
   };
 
+  const getStrengthConfig = (score: number) => {
+    if (score >= 7.5) {
+      return { label: 'Strong fit', className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+    } else if (score >= 5.0) {
+      return { label: 'Possible', className: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+    } else {
+      return { label: 'Stretch', className: 'bg-zinc-800 text-zinc-400 border-zinc-750' };
+    }
+  };
+
+  const getProcessedIdeas = () => {
+    let result = [...ideas];
+    
+    if (sortBy === 'manual') {
+      result = result.filter(i => i.source === 'Manually added');
+    } else if (sortBy === 'newest') {
+      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else {
+      // Recommended: sort by score descending
+      result.sort((a, b) => b.score - a.score);
+    }
+    
+    return result;
+  };
+
+  const sortedIdeas = getProcessedIdeas();
+
   return (
-    <div className="space-y-6 relative">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-xl font-bold text-white">Qualified Content Ideas Vault</h3>
-          <p className="text-sm text-gray-400 mt-1">
-            Choose a seed concept to execute or add a manual entry to trigger the creation pipeline.
-          </p>
+    <div className="space-y-6 relative select-none">
+      
+      {/* Header controls */}
+      <div className="flex items-center justify-between border-b border-zinc-800/40 pb-4">
+        {/* Sorting selector */}
+        <div className="flex items-center gap-2">
+          <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Sort by:</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="bg-zinc-950/60 border border-zinc-850 hover:border-zinc-800 rounded-lg py-1.5 px-3 text-xs text-zinc-300 outline-none cursor-pointer transition-colors"
+          >
+            <option value="recommended">AI Recommendation</option>
+            <option value="newest">Newest First</option>
+            <option value="manual">Manually Added</option>
+          </select>
         </div>
+
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-1.5 py-2 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors text-sm shadow-md active:scale-95"
+          className="flex items-center gap-1.5 py-2 px-4 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-xs transition-colors active:scale-95 shadow-md shadow-primary/20 cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
-          <span>Add Idea</span>
+          <Plus size={14} />
+          <span>Add idea manually</span>
         </button>
       </div>
 
       {loading && ideas.length === 0 ? (
-        <div className="text-center py-12">
-          <svg className="animate-spin h-8 w-8 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          <p className="text-sm text-gray-500 mt-4">Loading your content vault...</p>
+        <div className="text-center py-16 animate-in fade-in duration-300">
+          <ArrowsClockwise size={28} className="animate-spin text-primary mx-auto" />
+          <p className="text-xs text-zinc-500 mt-4">Loading your vault database...</p>
         </div>
       ) : ideas.length === 0 ? (
-        <div className="glass-panel rounded-xl p-12 text-center max-w-lg mx-auto border border-dashed border-gray-800">
-          <FolderOpen className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-          <h4 className="text-white font-semibold text-base mb-1">Vault is Empty</h4>
-          <p className="text-sm text-gray-500 mb-6">
-            There are no qualified ideas in your database yet. Run the Oracle mining pass or add an idea manually.
-          </p>
+        <div className="glass-panel rounded-2xl p-12 text-center max-w-sm mx-auto border border-zinc-850 bg-zinc-950/20 space-y-6 animate-in fade-in duration-300">
+          <FolderOpen size={36} className="text-zinc-650 mx-auto" />
+          <div className="space-y-2">
+            <h4 className="text-foreground font-semibold text-sm">Nothing here yet</h4>
+            <p className="text-xs text-zinc-500 leading-relaxed">
+              Nothing here yet. Run a scan to find some, or add one yourself.
+            </p>
+          </div>
           <button
             onClick={() => setModalOpen(true)}
-            className="py-2 px-4 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium transition-colors border border-gray-700"
+            className="py-2.5 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-850 text-zinc-300 font-semibold text-xs transition-colors border border-zinc-800"
           >
-            Create New Seed Idea
+            Add idea manually
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {ideas.map((idea) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {sortedIdeas.map((idea, index) => {
             const isSelected = activeIdea && activeIdea.id === idea.id;
+            const isTopRecommended = sortBy === 'recommended' && index === 0;
+            const strength = getStrengthConfig(idea.score);
+            const isRationaleExpanded = expandedRationaleId === idea.id;
+
             return (
               <div
                 key={idea.id}
-                className={`glass-panel p-5 rounded-xl border flex flex-col justify-between transition-all duration-300 ${
+                className={clsx(
+                  "p-5 rounded-2xl border flex flex-col justify-between transition-all duration-300 relative overflow-hidden bg-zinc-950/40",
                   isSelected
-                    ? 'border-primary-500/50 shadow-lg shadow-primary-500/5 bg-primary-950/5'
-                    : 'border-gray-800 hover:border-gray-700 hover:bg-gray-900/10'
-                }`}
+                    ? 'border-primary shadow-lg shadow-primary/5'
+                    : 'border-zinc-850 hover:border-zinc-800'
+                )}
               >
-                <div className="space-y-3.5">
+                {/* suggested-for-you decoration badge (Von Restorff effect) */}
+                {isTopRecommended && (
+                  <div className="absolute top-0 right-0 bg-primary text-[8px] font-mono tracking-widest text-white px-2 py-0.5 rounded-bl-lg uppercase">
+                    Suggested
+                  </div>
+                )}
+
+                <div className="space-y-3">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary-950 text-primary-300 border border-primary-800/40">
-                      <Star className="w-3 h-3 fill-primary-300/20" />
-                      <span>{idea.score.toFixed(1)}/10</span>
+                    <span 
+                      title={`Oracle Score: ${idea.score.toFixed(1)}/10`}
+                      className="flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 cursor-help"
+                    >
+                      <Star size={10} weight="fill" />
+                      <span>{idea.score.toFixed(1)}</span>
                     </span>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-700/40">
+                    <span className={clsx("text-[9px] px-2 py-0.5 rounded-full border", strength.className)}>
+                      {strength.label}
+                    </span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-500 border border-zinc-850">
                       {idea.source}
                     </span>
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-white text-base leading-snug">{idea.title}</h4>
-                    <p className="text-gray-400 text-xs mt-1.5 line-clamp-3 leading-relaxed">
+                    <h4 className="font-bold text-foreground text-xs leading-snug">{idea.title}</h4>
+                    <p className="text-zinc-400 text-[10.5px] mt-1.5 line-clamp-3 leading-relaxed">
                       {idea.description}
                     </p>
                   </div>
 
                   {idea.rationale && (
-                    <div className="p-3 bg-gray-950/50 border border-gray-900 rounded-lg">
-                      <p className="text-[11px] text-gray-500 font-medium uppercase tracking-wider">Oracle Rationale</p>
-                      <p className="text-xs text-gray-400 mt-1 leading-relaxed">{idea.rationale}</p>
+                    <div className="pt-2">
+                      <button
+                        onClick={() => setExpandedRationaleId(isRationaleExpanded ? null : idea.id)}
+                        className="text-[10px] text-zinc-500 hover:text-zinc-300 flex items-center gap-1 font-medium transition-colors"
+                      >
+                        <Chats size={11} />
+                        <span>{isRationaleExpanded ? 'Hide Oracle Rationale' : 'Show Oracle Rationale'}</span>
+                        {isRationaleExpanded ? <CaretUp size={10} /> : <CaretDown size={10} />}
+                      </button>
+                      {isRationaleExpanded && (
+                        <div className="mt-2 p-3 bg-zinc-900/60 border border-zinc-850 rounded-xl animate-in fade-in slide-in-from-top-1 duration-200">
+                          <p className="text-[10.5px] text-zinc-400 leading-relaxed font-sans">{idea.rationale}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
 
-                <div className="mt-5 pt-3.5 border-t border-gray-900/60 flex justify-end">
+                <div className="mt-4 pt-3 border-t border-zinc-900/60 flex justify-end">
                   <button
-                    onClick={() => handleSelectIdea(idea.id)}
-                    className={`py-1.5 px-4 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                    onClick={() => handleSelectIdea(idea)}
+                    className={clsx(
+                      "py-1.5 px-4 rounded-xl text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer",
                       isSelected
-                        ? 'bg-primary-600/20 text-primary-400 border border-primary-500/20 pointer-events-none'
-                        : 'bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 hover:border-gray-600 active:scale-95'
-                    }`}
+                        ? 'bg-primary/10 text-primary border border-primary/20 pointer-events-none'
+                        : 'bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 hover:border-zinc-750 active:scale-95'
+                    )}
                   >
                     {isSelected ? (
                       <>
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Active Runway</span>
+                        <Check size={12} className="font-bold" />
+                        <span>Active runway</span>
                       </>
                     ) : (
-                      <span>Select Concept</span>
+                      <>
+                        <span>Use this idea</span>
+                        <ArrowRight size={10} />
+                      </>
                     )}
                   </button>
                 </div>
@@ -187,68 +262,68 @@ export const VaultTab: React.FC<VaultTabProps> = ({
         </div>
       )}
 
-      {/* Custom Modal */}
+      {/* Manual Input Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-lg rounded-xl overflow-hidden shadow-2xl border border-gray-800/80 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between p-5 border-b border-gray-800 bg-gray-950/40">
-              <h3 className="text-base font-bold text-white">Add New Seed Idea</h3>
+          <div className="glass-panel w-full max-w-md rounded-2xl overflow-hidden shadow-2xl border border-zinc-800/80 animate-in fade-in zoom-in-95 duration-200 bg-zinc-950">
+            <div className="flex items-center justify-between p-5 border-b border-zinc-900 bg-zinc-900/20">
+              <h3 className="text-sm font-bold text-foreground">Add New Concept</h3>
               <button
                 onClick={() => setModalOpen(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-zinc-500 hover:text-foreground transition-colors cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-400">Concept Title</label>
+                <label className="text-xs font-semibold text-zinc-400">Concept Title</label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Stop Paraphrasing in AI Writing"
-                  className="w-full bg-gray-950/60 border border-gray-800 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 rounded-lg p-2.5 text-sm text-white placeholder-gray-600 transition-all outline-none"
+                  className="w-full bg-zinc-950/60 border border-zinc-850 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl p-2.5 text-xs text-foreground placeholder-zinc-700 transition-all outline-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-400">Description / Direct Context</label>
+                <label className="text-xs font-semibold text-zinc-400">Description / Direct Context</label>
                 <textarea
                   required
                   rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the core argument, target audience, and key spike trigger..."
-                  className="w-full bg-gray-950/60 border border-gray-800 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 rounded-lg p-2.5 text-sm text-white placeholder-gray-600 transition-all outline-none resize-none"
+                  className="w-full bg-zinc-950/60 border border-zinc-850 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl p-2.5 text-xs text-foreground placeholder-zinc-700 transition-all outline-none resize-none custom-scroll leading-relaxed"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-400">Source Reference (Optional)</label>
+                <label className="text-xs font-semibold text-zinc-400">Source Reference (Optional)</label>
                 <input
                   type="text"
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
                   placeholder="e.g. Sync notes with CEO, Slack channel conversation"
-                  className="w-full bg-gray-950/60 border border-gray-800 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 rounded-lg p-2.5 text-sm text-white placeholder-gray-600 transition-all outline-none"
+                  className="w-full bg-zinc-950/60 border border-zinc-850 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl p-2.5 text-xs text-foreground placeholder-zinc-700 transition-all outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-gray-800/40">
+              <div className="flex justify-end gap-3 pt-3 border-t border-zinc-900/60">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="py-2 px-4 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium transition-colors text-xs"
+                  className="py-2 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-850 text-zinc-400 font-semibold text-xs border border-zinc-850 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="py-2 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold transition-colors text-xs disabled:opacity-50"
+                  className="py-2 px-4 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold transition-colors text-xs disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? 'Saving...' : 'Save Idea to Vault'}
                 </button>
