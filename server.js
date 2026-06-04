@@ -36,6 +36,18 @@ const ai = new GoogleGenAI({ apiKey });
 const FAST_MODEL = "gemini-2.5-flash";
 const PRO_MODEL = "gemini-2.5-pro";
 
+// Helper to safely parse Gemini JSON responses, stripping any markdown wrappers if necessary
+function parseGeminiJson(text) {
+  if (!text) return null;
+  const trimmed = text.trim();
+  try {
+    return JSON.parse(trimmed);
+  } catch (e) {
+    const clean = trimmed.replace(/```json/g, "").replace(/```/g, "").trim();
+    return JSON.parse(clean);
+  }
+}
+
 // Loaders for new structured database configuration files
 async function loadAntiSlop() {
   return await storage.getAntiSlop();
@@ -544,13 +556,7 @@ Do not include markdown tags like \`\`\`json or \`\`\`. Just return raw JSON.
       config: { responseMimeType: "application/json" }
     });
 
-    let newIdeas = [];
-    try {
-      newIdeas = JSON.parse(response.text.trim());
-    } catch (e) {
-      const cleanText = response.text.replace(/```json/g, "").replace(/```/g, "").trim();
-      newIdeas = JSON.parse(cleanText);
-    }
+    const newIdeas = parseGeminiJson(response.text) || [];
 
     // Semantic Deduplication via Gemini against existing vault
     let filteredNewIdeas = [];
@@ -584,13 +590,7 @@ Do not wrap in markdown tags. Return raw JSON.
         config: { responseMimeType: "application/json" }
       });
 
-      let dupResults = [];
-      try {
-        dupResults = JSON.parse(dupResponse.text.trim());
-      } catch (e) {
-        const clean = dupResponse.text.replace(/```json/g, "").replace(/```/g, "").trim();
-        dupResults = JSON.parse(clean);
-      }
+      const dupResults = parseGeminiJson(dupResponse.text) || [];
 
       filteredNewIdeas = newIdeas.filter(idea => {
         const match = dupResults.find(d => d.title.toLowerCase() === idea.title.toLowerCase());
@@ -1011,13 +1011,7 @@ Do not include markdown wrappers. Return raw JSON.
       config: { responseMimeType: "application/json" }
     });
 
-    let evaluation;
-    try {
-      evaluation = JSON.parse(evalResponse.text.trim());
-    } catch (e) {
-      const clean = evalResponse.text.replace(/```json/g, "").replace(/```/g, "").trim();
-      evaluation = JSON.parse(clean);
-    }
+    const evaluation = parseGeminiJson(evalResponse.text);
 
     // If score is low (< 7), make them answer again / follow up
     if (evaluation.score < 7 && state.questionsAsked.length < state.maxQuestions) {
@@ -1085,13 +1079,7 @@ Do not wrap in markdown tags. Return raw JSON.
           config: { responseMimeType: "application/json" }
         });
 
-        let extraction = {};
-        try {
-          extraction = JSON.parse(extractResponse.text.trim());
-        } catch (e) {
-          const clean = extractResponse.text.replace(/```json/g, "").replace(/```/g, "").trim();
-          extraction = JSON.parse(clean);
-        }
+        const extraction = parseGeminiJson(extractResponse.text) || {};
 
         await storage.saveInterviewExtraction(extraction);
         console.log("Saved interview extraction file successfully.");
@@ -1371,13 +1359,7 @@ Do not wrap in markdown tags. Return raw JSON.
             config: { responseMimeType: "application/json" }
           });
           
-          let result;
-          try {
-            result = JSON.parse(response.text.trim());
-          } catch (e) {
-            const clean = response.text.replace(/```json/g, "").replace(/```/g, "").trim();
-            result = JSON.parse(clean);
-          }
+          const result = parseGeminiJson(response.text) || {};
           return {
             name: member.name,
             score: result.score || 5.0,
@@ -1539,13 +1521,7 @@ Do not use markdown blocks. Return raw JSON.
       config: { responseMimeType: "application/json" }
     });
 
-    let result;
-    try {
-      result = JSON.parse(response.text.trim());
-    } catch (e) {
-      const clean = response.text.replace(/```json/g, "").replace(/```/g, "").trim();
-      result = JSON.parse(clean);
-    }
+    const result = parseGeminiJson(response.text) || {};
 
     const derivatives = result.derivatives || [];
     console.log(`Generated ${derivatives.length} derivatives. Running parallel Quality Gate review...`);
@@ -1580,13 +1556,7 @@ Do not use markdown blocks. Return raw JSON.
           config: { responseMimeType: "application/json" }
         });
         
-        let gateResult;
-        try {
-          gateResult = JSON.parse(gateResponse.text.trim());
-        } catch (e) {
-          const clean = gateResponse.text.replace(/```json/g, "").replace(/```/g, "").trim();
-          gateResult = JSON.parse(clean);
-        }
+        const gateResult = parseGeminiJson(gateResponse.text) || {};
 
         const score = gateResult.score || 8.0;
         console.log(`Quality Gate for "${derivative.platform}" scored: ${score}/10`);
@@ -1719,13 +1689,7 @@ Do not wrap in markdown tags. Return raw JSON.
       config: { responseMimeType: "application/json" }
     });
 
-    let updatedDb;
-    try {
-      updatedDb = JSON.parse(response.text.trim());
-    } catch (e) {
-      const clean = response.text.replace(/```json/g, "").replace(/```/g, "").trim();
-      updatedDb = JSON.parse(clean);
-    }
+    const updatedDb = parseGeminiJson(response.text) || {};
 
     lessonsData.global = updatedDb.global || [];
     lessonsData.byContentType = updatedDb.byContentType || {};
