@@ -19,7 +19,9 @@ interface AppContextType {
   addLog: (type: 'info' | 'success' | 'warning' | 'error', message: string) => void;
   clearLogs: () => void;
   isActivityOpen: boolean;
-  setIsActivityOpen: (open: boolean) => void;
+  setIsActivityOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
+  isPinned: boolean;
+  setIsPinned: (pinned: boolean | ((prev: boolean) => boolean)) => void;
   unreadLogsCount: number;
   resetUnreadLogsCount: () => void;
   isAdvancedMode: boolean;
@@ -29,6 +31,8 @@ interface AppContextType {
   refreshActiveIdea: () => Promise<void>;
   status: AppStatus;
   setStatus: (status: AppStatus) => void;
+  contentType: string;
+  setContentType: (contentType: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -43,7 +47,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [logs, setLogs] = useState<LogLine[]>([
     { type: 'info', message: 'Ready. Start by scanning all sources or picking an idea.', time: new Date().toLocaleTimeString() }
   ]);
-  const [isActivityOpen, setIsActivityOpen] = useState<boolean>(false);
+  const [isActivityOpen, setIsActivityOpenState] = useState<boolean>(false);
+  const [isPinned, setIsPinnedState] = useState<boolean>(false);
+  const [contentType, setContentType] = useState<string>('LinkedIn Post');
   const [unreadLogsCount, setUnreadLogsCount] = useState<number>(0);
   
   // Advanced Mode (Persisted in localStorage)
@@ -65,6 +71,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const handleTabChange = useCallback((tab: string) => {
     setActiveTabState(tab);
     window.location.hash = tab === 'home' ? '' : tab;
+  }, []);
+
+  const setIsActivityOpen = useCallback((open: boolean | ((prev: boolean) => boolean)) => {
+    setIsActivityOpenState((prev) => {
+      const next = typeof open === 'function' ? open(prev) : open;
+      if (!next) {
+        setIsPinnedState(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const setIsPinned = useCallback((pinned: boolean | ((prev: boolean) => boolean)) => {
+    setIsPinnedState((prev) => {
+      const next = typeof pinned === 'function' ? pinned(prev) : pinned;
+      setIsActivityOpenState(next);
+      return next;
+    });
   }, []);
 
   // Update hash routing on mount or back navigation
@@ -95,7 +119,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLogs((prev) => [...prev, { type, message, time }]);
     
     // Only increment unread count if the drawer is closed
-    setIsActivityOpen((isOpen) => {
+    setIsActivityOpenState((isOpen) => {
       if (!isOpen) {
         setUnreadLogsCount((c) => c + 1);
       }
@@ -180,6 +204,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         clearLogs,
         isActivityOpen,
         setIsActivityOpen,
+        isPinned,
+        setIsPinned,
         unreadLogsCount,
         resetUnreadLogsCount,
         isAdvancedMode,
@@ -188,7 +214,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setTheme,
         refreshActiveIdea,
         status,
-        setStatus
+        setStatus,
+        contentType,
+        setContentType
       }}
     >
       {children}

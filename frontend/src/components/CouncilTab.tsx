@@ -25,7 +25,7 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
   onLog,
   onNavigateToTab,
 }) => {
-  const { setStatus } = useApp();
+  const { setStatus, contentType } = useApp();
   const [iterations, setIterations] = useState<Iteration[]>([]);
   const [finalScore, setFinalScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,7 +54,7 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
     onLog('info', 'Convening 6 expert reviewers to score and revise draft in background...');
 
     try {
-      const res = await api.conveneCouncil('LinkedIn Post'); // Target type default
+      const res = await api.conveneCouncil(contentType); // Target type from global state
       if (res.success) {
         setFinalScore(res.finalScore);
         setIterations(res.iterations);
@@ -147,7 +147,7 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
         <div className="space-y-1">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-primary" />
-            <span>Writer's Council & Revision Loop</span>
+            <span>Polish draft</span>
           </h3>
           <p className="text-xs text-zinc-500 max-w-[65ch] leading-relaxed">
             Convenes 6 expert reviewer personas. Automatically edits, evaluates, and revision-loops the draft until it scores &ge; 9/10.

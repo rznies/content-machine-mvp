@@ -278,6 +278,30 @@ export const RepurposeTab: React.FC<RepurposeTabProps> = ({
               </div>
             )}
           </div>
+
+          {/* Action CTAs Footer */}
+          <div className="flex items-center justify-end gap-3 border-t border-zinc-850 pt-5 mt-2">
+            <button
+              onClick={() => {
+                onLog('success', `Saved ${selectedPlatforms.length} selected platform drafts.`);
+                onNavigateToTab('revision');
+              }}
+              className="py-2.5 px-4 rounded-xl border border-zinc-800 hover:border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-zinc-300 hover:text-foreground font-semibold text-xs transition-colors cursor-pointer"
+            >
+              Save as drafts
+            </button>
+
+            <button
+              onClick={() => {
+                onLog('success', `Published selected derivatives to ${selectedPlatforms.join(', ')}.`);
+                onNavigateToTab('revision');
+              }}
+              className="py-2.5 px-6 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] group cursor-pointer"
+            >
+              <span>Publish selected</span>
+              <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
         </div>
       )}
 

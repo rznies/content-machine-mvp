@@ -30,6 +30,53 @@ export const RevisionTab: React.FC<RevisionTabProps> = ({
   const [saving, setSaving] = useState(false);
   const [draftSaving, setDraftSaving] = useState(false);
 
+  const renderDiff = (draft1: string, draft2: string) => {
+    if (!draft1) return null;
+    if (!draft2) {
+      return (
+        <pre className="text-[11px] text-zinc-400 font-mono leading-relaxed whitespace-pre-wrap select-text">
+          {draft1}
+        </pre>
+      );
+    }
+    const lines1 = draft1.split('\n');
+    const lines2 = draft2.split('\n');
+    const maxLines = Math.max(lines1.length, lines2.length);
+    const diffNodes: React.ReactNode[] = [];
+
+    for (let i = 0; i < maxLines; i++) {
+      const l1 = lines1[i];
+      const l2 = lines2[i];
+
+      if (l1 === l2) {
+        if (l1 !== undefined) {
+          diffNodes.push(
+            <div key={`same-${i}`} className="font-mono text-[10.5px] text-zinc-500 py-0.5 px-3 whitespace-pre-wrap leading-relaxed select-text">
+              &nbsp;&nbsp;{l1}
+            </div>
+          );
+        }
+      } else {
+        if (l1 !== undefined && l1.trim() !== '') {
+          diffNodes.push(
+            <div key={`rem-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-rose-950/20 text-rose-450/90 border-l-2 border-rose-500/80 whitespace-pre-wrap leading-relaxed select-text">
+              -&nbsp;{l1}
+            </div>
+          );
+        }
+        if (l2 !== undefined && l2.trim() !== '') {
+          diffNodes.push(
+            <div key={`add-${i}`} className="font-mono text-[10.5px] py-0.5 px-3 bg-emerald-950/20 text-emerald-450/90 border-l-2 border-emerald-500/80 whitespace-pre-wrap leading-relaxed select-text">
+              +&nbsp;{l2}
+            </div>
+          );
+        }
+      }
+    }
+
+    return <div className="space-y-0.5 py-1">{diffNodes}</div>;
+  };
+
   const loadDrafts = async () => {
     setLoading(true);
     setStatus('working');
@@ -173,9 +220,7 @@ export const RevisionTab: React.FC<RevisionTabProps> = ({
                 <ArrowsClockwise size={24} className="text-zinc-500 animate-spin" />
               </div>
             ) : aiDraft ? (
-              <div className="text-xs text-zinc-400 font-mono leading-relaxed whitespace-pre-wrap select-text max-w-[65ch]">
-                {aiDraft}
-              </div>
+              renderDiff(aiDraft, draftText)
             ) : (
               <p className="text-xs text-zinc-600 italic text-center py-20">Original draft not found.</p>
             )}

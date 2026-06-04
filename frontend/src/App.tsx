@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useApp } from './context/AppContext';
+import { useApp, ThemeMode } from './context/AppContext';
 import { OracleTab } from './components/OracleTab';
 import { VaultTab } from './components/VaultTab';
 import { ResearcherTab } from './components/ResearcherTab';
@@ -72,7 +72,11 @@ function App() {
     addLog,
     isActivityOpen,
     setIsActivityOpen,
-    unreadLogsCount
+    isPinned,
+    setIsPinned,
+    unreadLogsCount,
+    theme,
+    setTheme
   } = useApp();
 
   // Keyboard Shortcuts & Command Palette
@@ -100,7 +104,7 @@ function App() {
         title: 'Toggle Activity Panel',
         shortcut: 'Cmd+.',
         action: () => {
-          setIsActivityOpen(!isActivityOpen);
+          setIsPinned(!isPinned);
           setIsCommandPaletteOpen(false);
         }
       },
@@ -163,7 +167,7 @@ function App() {
     if (!searchQuery.trim()) return commands;
     const query = searchQuery.toLowerCase();
     return commands.filter(cmd => cmd.title.toLowerCase().includes(query));
-  }, [searchQuery, activeIdea, isActivityOpen]);
+  }, [searchQuery, activeIdea, isPinned, theme]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -231,14 +235,29 @@ function App() {
 
         if ((e.metaKey || e.ctrlKey) && e.key === '.') {
           e.preventDefault();
-          setIsActivityOpen(!isActivityOpen);
+          setIsPinned(prev => !prev);
+        }
+
+        // Theme cycle keyboard shortcut (Cmd+Shift+T)
+        if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 't') {
+          e.preventDefault();
+          let nextTheme: ThemeMode = 'auto';
+          if (theme === 'auto') {
+            nextTheme = 'light';
+          } else if (theme === 'light') {
+            nextTheme = 'dark';
+          } else if (theme === 'dark') {
+            nextTheme = 'auto';
+          }
+          setTheme(nextTheme);
+          addLog('info', `Theme changed to ${nextTheme} via keyboard shortcut.`);
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCommandPaletteOpen, selectedIndex, filteredCommands, activeIdea, isActivityOpen]);
+  }, [isCommandPaletteOpen, selectedIndex, filteredCommands, activeIdea, isPinned, theme]);
 
   const getStepStatusIcon = (stepKey: string, isSelected: boolean) => {
     const isLocked = isStepLocked(stepKey);
@@ -450,9 +469,10 @@ function App() {
           </div>
         </div>
 
-        {/* Activity Panel Slide-over */}
-        <ActivityPanel />
       </main>
+
+      {/* Activity Panel */}
+      <ActivityPanel />
 
       {/* Command Palette Overlay */}
       {isCommandPaletteOpen && (

@@ -33,8 +33,7 @@ export const RefinementTab: React.FC<RefinementTabProps> = ({
   onLog,
   onNavigateToTab,
 }) => {
-  const { setStatus } = useApp();
-  const [contentType, setContentType] = useState('LinkedIn Post');
+  const { setStatus, contentType, setContentType } = useApp();
   const [styleGuide, setStyleGuide] = useState('Loading style guide instructions...');
   const [lessons, setLessons] = useState('No lessons logged yet. Future loops will populate this.');
   const [draft, setDraft] = useState('');
