@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { api, Idea } from '../lib/api';
+import { api, Idea, SettingsStatus } from '../lib/api';
 
 export interface LogLine {
   type: 'info' | 'success' | 'warning' | 'error';
@@ -35,6 +35,8 @@ interface AppContextType {
   setContentType: (contentType: string) => void;
   showOnboarding: boolean;
   setShowOnboarding: (show: boolean) => void;
+  settingsStatus: SettingsStatus | null;
+  refreshSettingsStatus: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -171,10 +173,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
-  // Fetch active idea initially
+  const [settingsStatus, setSettingsStatus] = useState<SettingsStatus | null>(null);
+
+  const refreshSettingsStatus = useCallback(async () => {
+    try {
+      const res = await api.getSettingsStatus();
+      setSettingsStatus(res);
+    } catch (err) {
+      console.error('Failed to load settings status:', err);
+    }
+  }, []);
+
+  // Fetch active idea and settings status initially
   useEffect(() => {
     refreshActiveIdea();
-  }, [refreshActiveIdea]);
+    refreshSettingsStatus();
+  }, [refreshActiveIdea, refreshSettingsStatus]);
 
   // Apply theme to DOM
   useEffect(() => {
@@ -230,7 +244,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         contentType,
         setContentType,
         showOnboarding,
-        setShowOnboarding
+        setShowOnboarding,
+        settingsStatus,
+        refreshSettingsStatus
       }}
     >
       {children}

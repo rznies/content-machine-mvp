@@ -54,6 +54,9 @@ export interface SettingsStatus {
   hasTavilyKey: boolean;
   hasFirecrawlKey: boolean;
   hasSlackToken: boolean;
+  hasGmailToken?: boolean;
+  hasNotionToken?: boolean;
+  hasRssConfig?: boolean;
   researchMode: string;
   message: string;
   geminiApiKey?: string;

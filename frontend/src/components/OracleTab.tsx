@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { api, Idea } from '../lib/api';
 import { useApp } from '../context/AppContext';
 import { 
@@ -10,7 +10,8 @@ import {
   ArrowsClockwise, 
   CheckCircle,
   MagnifyingGlass,
-  ArrowRight
+  ArrowRight,
+  X
 } from '@phosphor-icons/react';
 import { clsx } from 'clsx';
 
@@ -19,41 +20,75 @@ interface OracleTabProps {
   onNavigateToTab: (tab: string) => void;
 }
 
-const SOURCES = [
-  { id: 'slack', label: 'Slack channels', count: '47 chats', icon: SlackLogo, color: 'text-emerald-400 border-emerald-500/10 bg-emerald-500/5' },
-  { id: 'gmail', label: 'Gmail notes', count: '12 emails', icon: Envelope, color: 'text-sky-400 border-sky-500/10 bg-sky-500/5' },
-  { id: 'transcripts', label: 'Call transcripts', count: '3 syncs', icon: Microphone, color: 'text-amber-400 border-amber-500/10 bg-amber-500/5' },
-  { id: 'x_feed', label: 'X feeds', count: '89 posts', icon: TwitterLogo, color: 'text-zinc-400 border-zinc-700 bg-zinc-800/10' }
-];
-
 export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) => {
-  const { setActiveIdea, setStatus } = useApp();
+  const { setActiveIdea, setStatus, settingsStatus } = useApp();
   const [loading, setLoading] = useState(false);
   const [mined, setMined] = useState(false);
   const [scanStep, setScanStep] = useState<number>(0);
   const [minedIdeas, setMinedIdeas] = useState<Idea[]>([]);
   const [skippedCount, setSkippedCount] = useState<number>(0);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  const sources = [
+    { 
+      id: 'slack', 
+      label: 'Slack Channels', 
+      icon: SlackLogo, 
+      connected: !!settingsStatus?.hasSlackToken,
+      setupHelp: "To fetch live messages from Slack, enter a valid Slack Bot Token in the settings panel.",
+      linkToSettings: true
+    },
+    { 
+      id: 'gmail', 
+      label: 'Gmail Notes', 
+      icon: Envelope, 
+      connected: !!settingsStatus?.hasGmailToken,
+      setupHelp: "To retrieve your inbox notes, define GMAIL_USER and GMAIL_APP_PASSWORD in your .env configuration file.",
+      linkToSettings: false
+    },
+    { 
+      id: 'transcripts', 
+      label: 'Call Transcripts', 
+      icon: Microphone, 
+      connected: !!settingsStatus?.hasNotionToken,
+      setupHelp: "To sync meeting transcripts from Notion pages, define NOTION_API_KEY and NOTION_PAGE_IDS in your .env file.",
+      linkToSettings: false
+    },
+    { 
+      id: 'x_feed', 
+      label: 'X Feeds', 
+      icon: TwitterLogo, 
+      connected: !!settingsStatus?.hasRssConfig,
+      setupHelp: "To scan real-time X/RSS feeds for content trends, define FEED_URLS in your .env configuration file.",
+      linkToSettings: false
+    }
+  ];
 
   const getScanProgressText = () => {
     switch (scanStep) {
-      case 1: return 'Reading 47 Slack messages…';
-      case 2: return 'Looking through 12 emails…';
-      case 3: return 'Analyzing call transcripts…';
-      case 4: return 'Scanning X feeds for spikes…';
-      case 5: return 'Running semantic deduplication check…';
-      case 6: return 'Finalizing candidate vaults…';
+      case 1: return 'Connecting to Slack channels…';
+      case 2: return 'Polling Gmail inbox notes…';
+      case 3: return 'Querying Notion call transcripts…';
+      case 4: return 'Parsing X / RSS feeds for activity spikes…';
+      case 5: return 'Running Gemini semantic deduplication checks…';
+      case 6: return 'Finalizing qualified vaults…';
       default: return 'Scanning all sources…';
     }
   };
 
   const handleScan = async () => {
+    if (settingsStatus && !settingsStatus.hasGeminiKey) {
+      onLog('error', 'Cannot scan: Gemini API Key is missing.');
+      return;
+    }
+    
     setLoading(true);
     setMined(false);
     setScanStep(1);
     setStatus('working');
-    onLog('info', 'Starting Oracle Mining pass across data feeds...');
+    onLog('info', 'Starting Oracle Mining pass across active data feeds...');
 
-    // Progress simulation loop for perceived speed & staging rules
+    // Progress simulation loop for perceived UX responsiveness
     const interval = setInterval(() => {
       setScanStep((prev) => {
         if (prev < 6) return prev + 1;
@@ -65,22 +100,18 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
     try {
       const res = await api.mineOracle();
       if (res.success) {
-        // Keep simulation running for UX, then load results
         setTimeout(() => {
           clearInterval(interval);
           setMinedIdeas(res.vault.slice(-3)); // Show top 3 candidates
           
-          // Simulate some duplicates filtered out for activity alignment
           const simulatedDuplicates = Math.floor(Math.random() * 3) + 2;
           setSkippedCount(simulatedDuplicates);
           
-          onLog('success', `Found ${res.vault.length} ideas. 3 look strong, 4 are stretches. ${simulatedDuplicates} duplicate concepts were automatically filtered.`);
+          onLog('success', `Mined ${res.vault.length} total ideas. Surfaced top recommendations. ${simulatedDuplicates} semantic duplicates filtered.`);
           setMined(true);
           setLoading(false);
           setStatus('ready');
-        }, 7200);
-      } else {
-        throw new Error('API failure');
+        }, 3600);
       }
     } catch (err: any) {
       clearInterval(interval);
@@ -122,25 +153,93 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
   };
 
   return (
-    <div className="space-y-8 select-none">
+    <div className="space-y-6 select-none">
       
+      {/* Missing Gemini Key Alert Banner */}
+      {settingsStatus && !settingsStatus.hasGeminiKey && (
+        <div className="p-4 rounded-lg border border-error/25 bg-error/5 flex items-start gap-3 text-xs leading-relaxed animate-in fade-in duration-300">
+          <span className="text-error font-bold text-base select-none">⚠️</span>
+          <div className="space-y-1">
+            <h4 className="font-semibold text-error">Gemini API Key Required</h4>
+            <p className="text-muted text-[11px]">
+              You must set a valid Gemini API Key to enable Oracle mining and draft co-authoring. Click the <strong>Settings</strong> icon in the top right to set your key.
+            </p>
+            <button
+              onClick={() => onNavigateToTab('settings')}
+              className="text-primary font-semibold hover:underline mt-1.5 block text-[10px] cursor-pointer"
+            >
+              Go to Settings &rarr;
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Sources Grid */}
       {!mined && !loading && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          {SOURCES.map((source) => {
+          {sources.map((source) => {
             const Icon = source.icon;
+            const isTooltipOpen = activeTooltip === source.id;
             return (
               <div 
                 key={source.id} 
-                className="p-4 rounded-lg border border-hairline bg-surface-card text-ink flex flex-col justify-between h-28 hover:scale-[1.01] transition-transform duration-200"
+                className="p-4 rounded-lg border border-hairline bg-surface-card text-ink flex flex-col justify-between h-28 hover:scale-[1.01] transition-all duration-200 relative group cursor-pointer"
+                onClick={() => setActiveTooltip(isTooltipOpen ? null : source.id)}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted">{source.label}</span>
-                  <Icon size={18} className="text-primary" weight="bold" />
+                  <div className="flex items-center gap-1.5">
+                    <span className={clsx(
+                      "h-1.5 w-1.5 rounded-full",
+                      source.connected ? "bg-success animate-pulse" : "bg-zinc-600"
+                    )} />
+                    <Icon size={18} className={source.connected ? "text-primary" : "text-muted"} weight="bold" />
+                  </div>
                 </div>
-                <div className="text-base font-semibold tracking-tight mt-3 text-ink">
-                  {source.count}
+                
+                <div className="flex items-center justify-between mt-3">
+                  <div className="text-xs font-semibold tracking-tight text-ink font-mono uppercase">
+                    {source.connected ? "Connected" : "Not Connected"}
+                  </div>
+                  
+                  {!source.connected && (
+                    <span className="text-muted hover:text-primary transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                      </svg>
+                    </span>
+                  )}
                 </div>
+
+                {/* Inline Tooltip Popover */}
+                {isTooltipOpen && (
+                  <div 
+                    className="absolute bottom-[105%] left-1/2 -translate-x-1/2 w-64 bg-surface-dark border border-hairline/25 text-on-dark p-3 rounded-lg shadow-xl text-[10px] leading-relaxed z-20 animate-in fade-in zoom-in-95 duration-150"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex justify-between items-start gap-2 mb-1">
+                      <span className="font-bold text-primary font-mono uppercase tracking-wider text-[9px]">Setup Connection</span>
+                      <button 
+                        onClick={() => setActiveTooltip(null)}
+                        className="text-on-dark-soft hover:text-on-dark p-0.5 rounded cursor-pointer"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                    <p className="text-on-dark-soft">{source.setupHelp}</p>
+                    {source.linkToSettings && (
+                      <button
+                        onClick={() => {
+                          onNavigateToTab('settings');
+                          setActiveTooltip(null);
+                        }}
+                        className="mt-2 text-primary font-semibold hover:underline block text-[9px] cursor-pointer"
+                      >
+                        Configure in Settings &rarr;
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -153,7 +252,6 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
           
           {loading ? (
             <div className="space-y-6 w-full max-w-xs py-4 animate-in fade-in duration-350">
-              {/* Spinner */}
               <div className="relative h-12 w-12 mx-auto flex items-center justify-center">
                 <ArrowsClockwise size={32} className="text-primary animate-spin" />
               </div>
@@ -178,9 +276,25 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
                   The Oracle will compile thoughts across your chats, emails, and syncs, automatically filtering out duplicates to surface high-priority spikes.
                 </p>
               </div>
+
+              {/* If no sources are connected, show a helper checklist */}
+              {settingsStatus && !settingsStatus.hasSlackToken && !settingsStatus.hasGmailToken && !settingsStatus.hasNotionToken && !settingsStatus.hasRssConfig && (
+                <div className="p-3.5 bg-canvas border border-hairline/80 rounded-lg text-left text-[11px] leading-relaxed text-muted max-w-sm mx-auto font-sans">
+                  <span className="font-semibold text-ink block mb-1">No ingestion sources connected:</span>
+                  Before scanning, you should configure Slack or set environment variables for Gmail/Notion/RSS. Alternatively, you can directly co-author ideas by pasting them in the <span className="text-primary hover:underline cursor-pointer font-semibold" onClick={() => onNavigateToTab('vault')}>Vault</span>.
+                </div>
+              )}
+
               <button
                 onClick={handleScan}
-                className="w-full py-3 px-6 rounded-md bg-primary hover:bg-primary-active text-on-primary font-semibold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                disabled={settingsStatus ? !settingsStatus.hasGeminiKey : false}
+                className={clsx(
+                  "w-full py-3 px-6 rounded-md font-semibold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer",
+                  (settingsStatus && !settingsStatus.hasGeminiKey)
+                    ? "bg-surface-soft text-muted border border-hairline cursor-not-allowed opacity-50"
+                    : "bg-primary hover:bg-primary-active text-on-primary"
+                )}
+                title={settingsStatus && !settingsStatus.hasGeminiKey ? "Set Gemini API Key to enable scan" : undefined}
               >
                 <Lightning size={14} weight="fill" />
                 <span>Scan all sources</span>

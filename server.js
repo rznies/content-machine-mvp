@@ -331,6 +331,9 @@ app.get("/api/settings/status", async (req, res) => {
   const hasTavilyKey = !!process.env.TAVILY_API_KEY;
   const hasFirecrawlKey = !!process.env.FIRECRAWL_API_KEY;
   const hasSlackToken = !!process.env.SLACK_BOT_TOKEN;
+  const hasGmailToken = !!(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD);
+  const hasNotionToken = !!(process.env.NOTION_API_KEY && process.env.NOTION_PAGE_IDS);
+  const hasRssConfig = !!process.env.FEED_URLS;
   
   let researchMode = "google-grounding";
   if (hasTavilyKey && hasFirecrawlKey) {
@@ -346,6 +349,9 @@ app.get("/api/settings/status", async (req, res) => {
     hasTavilyKey,
     hasFirecrawlKey,
     hasSlackToken,
+    hasGmailToken,
+    hasNotionToken,
+    hasRssConfig,
     researchMode,
     geminiApiKey: process.env.GEMINI_API_KEY || "",
     tavilyApiKey: process.env.TAVILY_API_KEY || "",

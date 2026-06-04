@@ -35,7 +35,8 @@ export const SettingsTab: React.FC = () => {
     addLog, 
     isAdvancedMode, 
     setIsAdvancedMode,
-    setShowOnboarding
+    setShowOnboarding,
+    refreshSettingsStatus
   } = useApp();
 
   const [activeFile, setActiveFile] = useState('style-system.json');
@@ -112,6 +113,7 @@ export const SettingsTab: React.FC = () => {
         addLog('success', 'Connection settings and keys updated successfully.');
         setIsEditingKeys(false);
         await loadSettings();
+        await refreshSettingsStatus();
       } else {
         addLog('error', 'Failed to update connection settings.');
       }
