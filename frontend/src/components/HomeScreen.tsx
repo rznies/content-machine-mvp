@@ -34,7 +34,68 @@ export const HomeScreen: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-8 md:py-16 px-4 md:px-6 select-none animate-in fade-in slide-in-from-bottom-6 duration-500 font-sans">
+    <div className="max-w-5xl mx-auto py-8 md:py-12 px-4 md:px-6 select-none animate-in fade-in slide-in-from-bottom-6 duration-500 font-sans">
+      
+      {/* Dashboard Pipeline Graphic - Static Brand Artifact */}
+      <div className="w-full max-w-xl mx-auto mb-10 text-muted-soft">
+        <svg
+          viewBox="0 0 110 30"
+          className="w-full h-auto"
+          style={{ overflow: 'visible' }}
+        >
+          {/* Connection line */}
+          <line
+            x1="10"
+            y1="10"
+            x2="100"
+            y2="10"
+            stroke="var(--hairline)"
+            strokeWidth="0.75"
+            vectorEffect="non-scaling-stroke"
+          />
+
+          {/* Nodes and Labels */}
+          {[
+            { label: '01 / Ingest', x: 10 },
+            { label: '02 / Research', x: 28 },
+            { label: '03 / Refine', x: 46 },
+            { label: '04 / Council', x: 64 },
+            { label: '05 / Repurpose', x: 82 },
+            { label: '06 / Publish', x: 100 }
+          ].map((step, idx) => (
+            <g key={idx}>
+              {/* Outer structural layout ring */}
+              <circle
+                cx={step.x}
+                cy="10"
+                r="3"
+                fill="var(--canvas)"
+                stroke="var(--hairline)"
+                strokeWidth="0.75"
+                vectorEffect="non-scaling-stroke"
+              />
+              {/* Inner core dot */}
+              <circle
+                cx={step.x}
+                cy="10"
+                r="1"
+                fill="var(--muted-soft)"
+              />
+              {/* Text Label */}
+              <text
+                x={step.x}
+                y="20"
+                textAnchor="middle"
+                className="fill-current font-mono tracking-wider uppercase opacity-85"
+                style={{ fontSize: '2.5px' }}
+              >
+                {step.label}
+              </text>
+            </g>
+          ))}
+        </svg>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
         
         {/* Left column: Welcome Editorial Headline & Action Buttons */}

@@ -13,6 +13,7 @@ import {
   ClockCounterClockwise
 } from '@phosphor-icons/react';
 import { clsx } from 'clsx';
+import { OracleScanner } from './OracleScanner';
 
 interface CouncilTabProps {
   activeIdea: Idea | null;
@@ -139,6 +140,22 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
     return roles[name] || 'Expert Reviewer';
   };
 
+  const consensusMetrics = lastIteration && lastIteration.reviews ? (() => {
+    const reviews = lastIteration.reviews;
+    const approvedCount = reviews.filter(r => r.score >= 8.0).length;
+    const avgScore = reviews.reduce((sum, r) => sum + r.score, 0) / reviews.length;
+    let agreement = 'Low';
+    if (avgScore >= 8.5) agreement = 'High';
+    else if (avgScore >= 7.0) agreement = 'Moderate';
+    
+    return {
+      approvedCount,
+      totalCount: reviews.length,
+      agreement,
+      avgScore
+    };
+  })() : null;
+
   return (
     <div className="space-y-6 select-none animate-in fade-in duration-300 font-sans">
       
@@ -180,25 +197,29 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
 
       {/* Review Timeline & Progress Indicator */}
       {(loading || (iterations.length > 0 && !revealFinished)) && (
-        <div className="p-6 rounded-lg border border-hairline bg-surface-card text-center space-y-4 text-ink shadow-sm">
+        <div className="p-6 rounded-lg border border-hairline bg-surface-card text-center space-y-4 text-ink shadow-sm flex flex-col items-center justify-center">
+          {loading ? (
+            <OracleScanner size={48} className="mx-auto" />
+          ) : (
+            <div className="flex justify-center gap-2">
+              {[0, 1, 2, 3, 4, 5].map((idx) => {
+                const active = visibleReviewerCount > idx;
+                const current = visibleReviewerCount === idx;
+                return (
+                  <div 
+                    key={idx} 
+                    className={clsx(
+                      "h-1.5 w-10 rounded-full transition-all duration-300",
+                      active ? "bg-primary" : current ? "bg-primary/50 animate-pulse" : "bg-hairline"
+                    )}
+                  />
+                );
+              })}
+            </div>
+          )}
           <h4 className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted">
-            6 expert reviewers are reading your draft.
+            {loading ? "Convening the Writer's Council & revising draft..." : "6 expert reviewers are reading your draft."}
           </h4>
-          <div className="flex justify-center gap-2">
-            {[0, 1, 2, 3, 4, 5].map((idx) => {
-              const active = visibleReviewerCount > idx;
-              const current = visibleReviewerCount === idx;
-              return (
-                <div 
-                  key={idx} 
-                  className={clsx(
-                    "h-1.5 w-10 rounded-full transition-all duration-300",
-                    active ? "bg-primary" : current ? "bg-primary/50 animate-pulse" : "bg-hairline"
-                  )}
-                />
-              );
-            })}
-          </div>
         </div>
       )}
 
@@ -211,9 +232,26 @@ export const CouncilTab: React.FC<CouncilTabProps> = ({
             
             {/* Reviews Cards */}
             <div className="p-5 rounded-lg border border-hairline bg-surface-card text-ink shadow-sm">
-              <h4 className="font-mono font-bold text-muted text-[10px] uppercase tracking-wider mb-4">
-                Reviewer Evaluation Breakdown
-              </h4>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-hairline/60 pb-3 mb-4">
+                <h4 className="font-mono font-bold text-muted text-[10px] uppercase tracking-wider">
+                  Reviewer Evaluation Breakdown
+                </h4>
+                {revealFinished && consensusMetrics && (
+                  <div className="flex items-center gap-2 font-mono text-[9px]">
+                    <span className="px-2 py-0.5 rounded border border-primary/20 bg-primary/5 text-primary font-bold">
+                      Approval: {consensusMetrics.approvedCount} / {consensusMetrics.totalCount} Approved
+                    </span>
+                    <span className={clsx(
+                      "px-2 py-0.5 rounded border font-bold",
+                      consensusMetrics.agreement === 'High' && "border-success/20 bg-success/5 text-success",
+                      consensusMetrics.agreement === 'Moderate' && "border-accent-amber/20 bg-accent-amber/5 text-accent-amber",
+                      consensusMetrics.agreement === 'Low' && "border-error/20 bg-error/5 text-error"
+                    )}>
+                      Agreement: {consensusMetrics.agreement}
+                    </span>
+                  </div>
+                )}
+              </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {lastIteration.reviews.slice(0, visibleReviewerCount).map((rev) => (

@@ -2,18 +2,15 @@ import React, { useState } from 'react';
 import { api, Idea } from '../lib/api';
 import { useApp } from '../context/AppContext';
 import { 
-  SlackLogo, 
-  Envelope, 
-  Microphone, 
-  TwitterLogo, 
   Lightning, 
-  ArrowsClockwise, 
   CheckCircle,
   MagnifyingGlass,
   ArrowRight,
   X
 } from '@phosphor-icons/react';
 import { clsx } from 'clsx';
+import { ConnectorIcon } from './ConnectorIcon';
+import { OracleScanner } from './OracleScanner';
 
 interface OracleTabProps {
   onLog: (type: 'info' | 'success' | 'warning' | 'error', message: string) => void;
@@ -33,7 +30,6 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
     { 
       id: 'slack', 
       label: 'Slack Channels', 
-      icon: SlackLogo, 
       connected: !!settingsStatus?.hasSlackToken,
       setupHelp: "To fetch live messages from Slack, enter a valid Slack Bot Token in the settings panel.",
       linkToSettings: true
@@ -41,7 +37,6 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
     { 
       id: 'gmail', 
       label: 'Gmail Notes', 
-      icon: Envelope, 
       connected: !!settingsStatus?.hasGmailToken,
       setupHelp: "To retrieve your inbox notes, define GMAIL_USER and GMAIL_APP_PASSWORD in your .env configuration file.",
       linkToSettings: false
@@ -49,7 +44,6 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
     { 
       id: 'transcripts', 
       label: 'Call Transcripts', 
-      icon: Microphone, 
       connected: !!settingsStatus?.hasNotionToken,
       setupHelp: "To sync meeting transcripts from Notion pages, define NOTION_API_KEY and NOTION_PAGE_IDS in your .env file.",
       linkToSettings: false
@@ -57,7 +51,6 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
     { 
       id: 'x_feed', 
       label: 'X Feeds', 
-      icon: TwitterLogo, 
       connected: !!settingsStatus?.hasRssConfig,
       setupHelp: "To scan real-time X/RSS feeds for content trends, define FEED_URLS in your .env configuration file.",
       linkToSettings: false
@@ -146,10 +139,10 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
 
   const getSourceIcon = (source: string) => {
     const s = source.toLowerCase();
-    if (s.includes('slack')) return <SlackLogo size={12} />;
-    if (s.includes('gmail') || s.includes('email')) return <Envelope size={12} />;
-    if (s.includes('transcript') || s.includes('call')) return <Microphone size={12} />;
-    return <TwitterLogo size={12} />;
+    if (s.includes('slack')) return <ConnectorIcon type="slack" size={12} />;
+    if (s.includes('gmail') || s.includes('email')) return <ConnectorIcon type="gmail" size={12} />;
+    if (s.includes('transcript') || s.includes('call') || s.includes('notion')) return <ConnectorIcon type="notion" size={12} />;
+    return <ConnectorIcon type="x" size={12} />;
   };
 
   return (
@@ -178,28 +171,40 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
       {!mined && !loading && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
           {sources.map((source) => {
-            const Icon = source.icon;
             const isTooltipOpen = activeTooltip === source.id;
             return (
               <div 
                 key={source.id} 
-                className="p-4 rounded-lg border border-hairline bg-surface-card text-ink flex flex-col justify-between h-28 hover:scale-[1.01] transition-all duration-200 relative group cursor-pointer"
+                className={clsx(
+                  "p-4 rounded-lg bg-surface-card text-ink flex flex-col justify-between h-28 hover:scale-[1.01] transition-all duration-200 relative group cursor-pointer",
+                  source.connected ? "border border-hairline border-solid" : "border border-dashed border-muted-soft/40"
+                )}
                 onClick={() => setActiveTooltip(isTooltipOpen ? null : source.id)}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted">{source.label}</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className={clsx(
-                      "h-1.5 w-1.5 rounded-full",
-                      source.connected ? "bg-success animate-pulse" : "bg-zinc-600"
-                    )} />
-                    <Icon size={18} className={source.connected ? "text-primary" : "text-muted"} weight="bold" />
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted">{source.label}</span>
+                    <div className="flex items-center gap-1">
+                      <span className={clsx(
+                        "h-1.5 w-1.5 rounded-full",
+                        source.connected ? "bg-success animate-pulse" : "bg-muted-soft/60"
+                      )} />
+                      <span className="text-[9px] font-mono text-muted uppercase">
+                        {source.connected ? "Connected" : "Offline"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={clsx(
+                    "w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-200",
+                    source.connected ? "border-primary/20 bg-primary/5 text-primary" : "border-hairline bg-surface-soft text-muted"
+                  )}>
+                    <ConnectorIcon type={source.id as any} size={20} />
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between mt-3">
-                  <div className="text-xs font-semibold tracking-tight text-ink font-mono uppercase">
-                    {source.connected ? "Connected" : "Not Connected"}
+                <div className="flex items-center justify-between mt-2">
+                  <div className="text-[10px] font-semibold tracking-tight text-muted font-mono uppercase">
+                    {source.connected ? "Ready" : "Setup Required"}
                   </div>
                   
                   {!source.connected && (
@@ -251,11 +256,9 @@ export const OracleTab: React.FC<OracleTabProps> = ({ onLog, onNavigateToTab }) 
         <div className="p-8 rounded-lg border border-hairline bg-surface-card text-center flex flex-col items-center justify-center min-h-[280px] shadow-sm relative overflow-hidden">
           
           {loading ? (
-            <div className="space-y-6 w-full max-w-xs py-4 animate-in fade-in duration-350">
-              <div className="relative h-12 w-12 mx-auto flex items-center justify-center">
-                <ArrowsClockwise size={32} className="text-primary animate-spin" />
-              </div>
-              <div className="space-y-2">
+            <div className="space-y-6 w-full max-w-xs py-4 animate-in fade-in duration-350 flex flex-col items-center">
+              <OracleScanner size={80} className="mx-auto" />
+              <div className="space-y-2 w-full">
                 <h4 className="text-sm font-semibold tracking-tight text-ink font-serif">{getScanProgressText()}</h4>
                 <div className="h-1.5 w-full bg-surface-soft rounded-md overflow-hidden border border-hairline">
                   <div 

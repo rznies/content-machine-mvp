@@ -22,6 +22,7 @@ import {
   X
 } from '@phosphor-icons/react';
 import { clsx } from 'clsx';
+import { ConnectorIcon } from './ConnectorIcon';
 
 const FILES_CONFIG = [
   { name: 'style-guide.md', label: 'Style Guide', icon: FileText, desc: 'Legacy voice style guide containing principles for generating draft copies.' },
@@ -313,12 +314,18 @@ export const SettingsTab: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Gemini */}
-          <div className="p-4 border border-hairline/60 rounded-lg bg-background/50 flex flex-col justify-between shadow-sm space-y-3">
+          <div className={clsx(
+            "p-4 rounded-lg bg-background/50 flex flex-col justify-between shadow-sm space-y-3 transition-all duration-200",
+            status?.hasGeminiKey ? "border border-hairline border-solid" : "border border-dashed border-muted-soft/40"
+          )}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="h-8 w-8 rounded-lg bg-surface-soft flex items-center justify-center border border-hairline text-muted shadow-sm">
-                  <Key size={15} />
-                </span>
+                <div className={clsx(
+                  "w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-200",
+                  status?.hasGeminiKey ? "border-primary/20 bg-primary/5 text-primary" : "border-hairline bg-surface-soft text-muted"
+                )}>
+                  <ConnectorIcon type="gemini" size={20} />
+                </div>
                 <div>
                   <h5 className="text-xs font-semibold text-ink">Gemini API Key</h5>
                   <p className="text-[9px] text-muted mt-0.5">Stored in .env key mappings</p>
@@ -356,12 +363,18 @@ export const SettingsTab: React.FC = () => {
           </div>
 
           {/* Tavily */}
-          <div className="p-4 border border-hairline/60 rounded-lg bg-background/50 flex flex-col justify-between shadow-sm space-y-3">
+          <div className={clsx(
+            "p-4 rounded-lg bg-background/50 flex flex-col justify-between shadow-sm space-y-3 transition-all duration-200",
+            status?.hasTavilyKey ? "border border-hairline border-solid" : "border border-dashed border-muted-soft/40"
+          )}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="h-8 w-8 rounded-lg bg-surface-soft flex items-center justify-center border border-hairline text-muted shadow-sm">
-                  <Key size={15} />
-                </span>
+                <div className={clsx(
+                  "w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-200",
+                  status?.hasTavilyKey ? "border-primary/20 bg-primary/5 text-primary" : "border-hairline bg-surface-soft text-muted"
+                )}>
+                  <ConnectorIcon type="tavily" size={20} />
+                </div>
                 <div>
                   <h5 className="text-xs font-semibold text-ink">Tavily Key</h5>
                   <p className="text-[9px] text-muted mt-0.5">Used for Google Grounding search</p>
@@ -399,12 +412,18 @@ export const SettingsTab: React.FC = () => {
           </div>
 
           {/* Firecrawl */}
-          <div className="p-4 border border-hairline/60 rounded-lg bg-background/50 flex flex-col justify-between shadow-sm space-y-3">
+          <div className={clsx(
+            "p-4 rounded-lg bg-background/50 flex flex-col justify-between shadow-sm space-y-3 transition-all duration-200",
+            status?.hasFirecrawlKey ? "border border-hairline border-solid" : "border border-dashed border-muted-soft/40"
+          )}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="h-8 w-8 rounded-lg bg-surface-soft flex items-center justify-center border border-hairline text-muted shadow-sm">
-                  <Key size={15} />
-                </span>
+                <div className={clsx(
+                  "w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-200",
+                  status?.hasFirecrawlKey ? "border-primary/20 bg-primary/5 text-primary" : "border-hairline bg-surface-soft text-muted"
+                )}>
+                  <ConnectorIcon type="firecrawl" size={20} />
+                </div>
                 <div>
                   <h5 className="text-xs font-semibold text-ink">Firecrawl Key</h5>
                   <p className="text-[9px] text-muted mt-0.5">Scrapes content reference details</p>
@@ -442,12 +461,18 @@ export const SettingsTab: React.FC = () => {
           </div>
 
           {/* Slack Bot Token */}
-          <div className="p-4 border border-hairline/60 rounded-lg bg-background/50 flex flex-col justify-between shadow-sm space-y-3">
+          <div className={clsx(
+            "p-4 rounded-lg bg-background/50 flex flex-col justify-between shadow-sm space-y-3 transition-all duration-200",
+            status?.hasSlackToken ? "border border-hairline border-solid" : "border border-dashed border-muted-soft/40"
+          )}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="h-8 w-8 rounded-lg bg-surface-soft flex items-center justify-center border border-hairline text-muted shadow-sm">
-                  <Key size={15} />
-                </span>
+                <div className={clsx(
+                  "w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-200",
+                  status?.hasSlackToken ? "border-primary/20 bg-primary/5 text-primary" : "border-hairline bg-surface-soft text-muted"
+                )}>
+                  <ConnectorIcon type="slack" size={20} />
+                </div>
                 <div>
                   <h5 className="text-xs font-semibold text-ink">Slack Bot Token</h5>
                   <p className="text-[9px] text-muted mt-0.5">Ingests internal Slack posts</p>
